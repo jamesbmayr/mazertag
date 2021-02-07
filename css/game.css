@@ -1,0 +1,166 @@
+/*** mobile ***/
+	@media screen and (max-width: 950px) {
+		:root {
+			--desktop-modifier: 0;
+		}
+	}
+
+	@media screen and (min-width: 951px) and (max-width: 1250px) {
+		:root {
+			--desktop-modifier: 1;
+		}
+	}
+
+	@media screen and (min-width: 1251px) {
+		:root {
+			--desktop-modifier: 2;
+		}
+	}
+
+/*** setup ***/
+	#setup {
+		z-index: 1;
+		padding: var(--medium-gap-size);
+		float: left;
+		width: calc(100vw - 2 * var(--medium-gap-size));
+		height: calc(100vh - 2 * var(--medium-gap-size));
+		background-color: var(--light-gray);
+	}
+
+	body:not([mode="setup"]) #setup {
+		display: none;
+		pointer-events: none;
+	}
+
+	/* global */
+		.setup-section {
+			background-color: var(--medium-gray);
+			border-radius: calc(1.5 * var(--border-radius));
+			padding: var(--medium-gap-size);
+			float: left;
+			width: calc(50vw - 3 * var(--medium-gap-size) - var(--small-gap-size));
+			margin-bottom: var(--medium-gap-size);
+		}
+
+	/* launch */
+		#setup-launch {
+			width: calc(100vw - 4 * var(--medium-gap-size));
+		}
+
+		#setup-launch-button {
+			font-size: var(--huge-font-size);
+			height: calc(var(--huge-font-size) + 3 * (var(--small-gap-size)));
+			margin: 0;
+			border-radius: calc(1.5 * var(--border-radius));
+		}
+
+	/* game */
+		#setup-game, #setup-controls {
+			margin-left: var(--small-gap-size);
+		}
+
+		#setup-controls label {
+			color: var(--light-gray);
+			font-size: var(--medium-font-size)
+		}
+
+		#setup-controls label span {
+			font-weight: bold;
+		}
+
+		#setup-controls label b {
+			font-weight: bold;
+			display: inline-block;
+			vertical-align: bottom;
+			text-align: center;
+			background-color: var(--light-gray);
+			padding: var(--small-gap-size);
+			color: var(--medium-gray);
+			height: var(--medium-font-size);
+			min-width: var(--medium-font-size);
+			margin: 0 calc(var(--small-gap-size) / 2);
+			border-radius: var(--border-radius);
+		}
+
+	/* players */
+		#setup-players {
+			margin-right: var(--small-gap-size);
+			overflow-x: hidden;
+			overflow-y: scroll;
+			max-height: calc(100vh - 2 * var(--medium-gap-size) - var(--huge-font-size) - 2 * var(--medium-gap-size) - 5 * var(--small-gap-size));
+		}
+
+		.setup-player {
+			float: left;
+			width: calc(100% - 2 * var(--small-gap-size));
+			padding: var(--small-gap-size);
+			margin-bottom: var(--medium-gap-size);
+			border-radius: var(--border-radius);
+		}
+
+		.setup-player:last-child {
+			margin-bottom: 0;
+		}
+
+	/* team */
+		.setup-player[team="red"] {
+			background-color: var(--medium-red);
+		}
+		.setup-player[team="orange"] {
+			background-color: var(--medium-orange);
+		}
+		.setup-player[team="yellow"] {
+			background-color: var(--medium-yellow);
+		}
+		.setup-player[team="green"] {
+			background-color: var(--medium-green);
+		}
+		.setup-player[team="blue"] {
+			background-color: var(--medium-blue);
+		}
+		.setup-player[team="purple"] {
+			background-color: var(--medium-purple);
+		}
+
+/*** map ***/
+	#map {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		border: 0;
+		border-radius: 0;
+		padding: 0;
+		margin: 0;
+		z-index: 0;
+		pointer-events: none;
+	}
+
+	body[mode="setup"] #map {
+		display: none;
+		pointer-events: none;
+	}
+
+/*** again ***/
+	#again {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: auto;
+		height: auto;
+		transform: translateX(-50%) translateY(-50%);
+		background-color: var(--dark-gray);
+		border-radius: calc(2 * var(--border-radius));
+		box-shadow: 0 0 var(--shadow-size) var(--dark-gray);
+		padding: var(--medium-gap-size);
+	}
+
+	#again a {
+		font-size: var(--huge-font-size);
+	}
+
+	body:not([mode="gameover"]) #again {
+		display: none;
+		pointer-events: none;
+	}

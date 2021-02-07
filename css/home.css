@@ -1,0 +1,111 @@
+/*** container ***/
+	#container {
+		position: absolute;
+		width: calc(4 * (var(--card-size) + var(--small-gap-size)) - var(--medium-gap-size));
+		height: auto;
+		top: 50%;
+		left: 50%;
+		transform: translateX(-50%) translateY(-50%);
+		padding: var(--medium-gap-size);
+		border-radius: calc(1.5 * var(--border-radius));
+		background-color: var(--medium-gray);
+		box-shadow: 0 0 var(--shadow-size) var(--medium-gray);
+	}
+
+	/* heading */
+		#heading-logo {
+			background-image: url("assets/logo.png");
+			background-repeat: no-repeat;
+			background-size: contain;
+			height: var(--huge-font-size);
+			width: var(--huge-font-size);
+			float: right;
+			border-radius: var(--border-radius);
+		}
+
+	/* forms */
+		#new-game-form, #join-game-form {
+			display: inline-block;
+			width: 50%;
+		}
+
+		#new-game-button {
+			font-size: var(--large-font-size);
+			float: left;
+			height: calc(2 * var(--card-size));
+			width: calc(2 * var(--card-size));
+			margin: 0;
+			margin-right: var(--small-gap-size);
+			transition: var(--transition-time);
+		}
+
+		#game-id-input {
+			font-size: var(--large-font-size);
+			float: right;
+			height: calc(var(--card-size) - 2 * var(--small-gap-size));
+			width: calc(2 * (var(--card-size) - 2 * var(--small-gap-size)));
+			margin: 0;
+			border-bottom-left-radius: 0;
+			border-bottom-right-radius: 0;
+			margin-left: var(--small-gap-size);
+			text-transform: uppercase;
+			transition: var(--transition-time);
+			text-align: center;
+		}
+
+		#join-game-button {
+			font-size: var(--large-font-size);
+			float: right;
+			margin: 0;
+			height: var(--card-size);
+			width: calc(2 * var(--card-size));
+			border-top-left-radius: 0;
+			border-top-right-radius: 0;
+			margin-left: var(--small-gap-size);
+			transition: var(--transition-time);
+		}
+
+/*** lasers ***/
+	#lasers {
+		z-index: 0;
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		overflow: hidden;
+		background: transparent;
+		pointer-events: none;
+	}
+
+	.laser {
+		position: absolute;
+		width: 2px;
+		height: 200vw;
+		min-height: 200vh;
+		transform-origin: center;
+		transform: translateX(-50%) translateY(-50%);
+		pointer-events: none;
+	}
+
+/*** j-logo ***/
+	#j-logo {
+		position: absolute;
+		top: 14px;
+		right: 8px;
+		background-color: transparent;
+		background-image: url("https://jamesmayr.com/resources/j.png");
+		background-repeat: no-repeat;
+		background-size: cover;
+		background-position: center center;
+		height: 32px;
+		width: 32px;
+		cursor: pointer;
+		z-index: 1000;
+		outline: none;
+		filter: drop-shadow(0px 0px var(--shadow-size) var(--light-gray));
+	}
+
+	#j-logo:hover, #j-logo:focus {
+		filter: drop-shadow(0px 0px var(--shadow-size) var(--medium-gray));
+	}

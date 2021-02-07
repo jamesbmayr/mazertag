@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title><script node>getAsset("title")</script>node>: 404</title>
+		<script node>getAsset("logo")</script>node>
+		<script node>getAsset("meta")</script>node>
+		<script node>getAsset("fonts")</script>node>
+		<script node>getAsset("css-variables")</script>node>
+		<style>
+			/*** page ***/
+				/* html */
+					html {
+						position: absolute;
+						top: 0;
+						left: 0;
+						width: 100%;
+						height: 100%;
+					}
+
+					body {
+						background-color: var(--dark-gray);
+						position: absolute;
+						margin: 0;
+						padding: 0;
+						top: 0;
+						left: 0;
+						width: 100%;
+						height: 100%;
+						overflow: hidden;
+						font-family: var(--font-0);
+					}
+
+			/*** elements ***/
+				/* headings */
+					h1 {
+						float: left;
+						width: 100%;
+						padding: var(--medium-gap-size) 0;
+						margin: 0;
+						line-height: 1;
+						font-size: var(--huge-font-size);
+						font-weight: bold;
+						color: var(--light-gray);
+						margin-bottom: var(--huge-font-size);
+						font-family: var(--font-0);
+					}
+
+					h2 {
+						float: left;
+						width: 100%;
+						padding: var(--medium-gap-size) 0;
+						margin: 0;
+						line-height: 1;
+						font-size: var(--large-font-size);
+						font-weight: bold;
+						color: var(--light-gray);
+						border-bottom: var(--border-size) solid var(--light-gray);
+						font-family: var(--font-0);
+					}
+
+					h3 {
+						float: left;
+						width: 100%;
+						padding: var(--medium-gap-size) 0;
+						margin: 0;
+						line-height: 1;
+						font-size: var(--medium-font-size);
+						font-weight: bold;
+						color: var(--light-gray);
+						font-family: var(--font-0);
+					}
+
+				/* link */
+					a {
+						display: inline-block;
+						font-weight: bold;
+						text-decoration: none;
+						outline: none;
+						color: var(--medium-blue);
+						cursor: pointer;
+						vertical-align: middle;
+						font-family: var(--font-0);
+						transition: var(--transition-time);
+					}
+
+					a:hover, a:focus {
+						text-shadow: 0 0 var(--shadow-size) var(--medium-blue);
+						text-decoration: none;
+					}
+
+					a:visited {
+						color: var(--medium-blue);
+						text-decoration: none;	
+					}
+
+				/* containers */
+					.center-container {
+						position: absolute;
+						top: 50%;
+						left: 50%;
+						transform: translateX(-50%) translateY(-50%);
+						width: auto;
+						height: auto;
+						max-height: calc(100% - 2 * (var(--edge-size)));
+						max-width: calc(100% - 2 * (var(--edge-size)));
+					}
+		</style>
+	</head>
+	<body>
+		<div class="center-container">
+			<h3>404</h3>
+			<h2>PAGE NOT FOUND</h2>
+			<h1><a href="/">GO BACK</a></h1>
+		</div>
+	</body>
+</html>
