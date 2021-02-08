@@ -300,20 +300,18 @@ window.addEventListener("load", function() {
 								playerElement.team.value = thatPlayer.status.team
 							}
 
-							if (playerElement.speed !== document.activeElement) {
-								playerElement.speed.value = thatPlayer.setup.speed
-							}
-							if (playerElement.strength !== document.activeElement) {
-								playerElement.strength.value = thatPlayer.setup.strength
-							}
-							if (playerElement.laser !== document.activeElement) {
-								playerElement.laser.value = thatPlayer.setup.laser
-							}
-							if (playerElement.recovery !== document.activeElement) {
-								playerElement.recovery.value = thatPlayer.setup.recovery
-							}
-							if (playerElement.vision !== document.activeElement) {
-								playerElement.vision.value = thatPlayer.setup.vision
+							playerElement.bar.setAttribute("statistics", JSON.stringify({
+								speed: thatPlayer.setup.speed,
+								strength: thatPlayer.setup.strength,
+								laser: thatPlayer.setup.laser,
+								recovery: thatPlayer.setup.recovery,
+								vision: thatPlayer.setup.vision
+							}))
+							
+							if (!document.activeElement || document.activeElement.className !== "setup-player-dragger") {
+								playerElement.bar.querySelectorAll(".setup-player-minibar").forEach(function(element) {
+									element.style.width = (thatPlayer.setup[element.getAttribute("statistic")] * 10) + "%"
+								})
 							}
 						}
 				} catch (error) {console.log(error)}
@@ -375,28 +373,27 @@ window.addEventListener("load", function() {
 						}
 
 					// stats
+						var bar = document.createElement("div")
+							bar.className = "setup-player-bar"
+							bar.setAttribute("statistics", "")
+						playerElement.appendChild(bar)
+						ELEMENTS.setup.players[player.id].bar = bar
+
 						var stats = ["speed", "strength", "laser", "recovery", "vision"]
-						for (var i in stats) {
-							var statLabel = document.createElement("label")
-								statLabel.className = "setup-row"
-							playerElement.appendChild(statLabel)
+						for (var i = 0; i < stats.length; i++) {
+							var minibar = document.createElement("div")
+								minibar.className = "setup-player-minibar"
+								minibar.setAttribute("statistic", stats[i])
+								minibar.innerText = stats[i]
+							bar.appendChild(minibar)
 
-							var statSpan = document.createElement("span")
-								statSpan.innerText = stats[i]
-							statLabel.appendChild(statSpan)
-
-							var statSelect = document.createElement("select")
-								statSelect.className = "setup-select"
-								statSelect.id = "setup-player-" + player.id + "-stat-" + stats[i]
-								if (player.id !== PLAYERID) { statSelect.setAttribute("readonly", true) }
-								else { statSelect.addEventListener("change", updateOption) }
-							statLabel.appendChild(statSelect)
-							ELEMENTS.setup.players[player.id][stats[i]] = statSelect
-
-							for (var j = 1; j <= 3; j++) {
-								var option = document.createElement("option")
-									option.value = option.innerText = "" + j
-								statSelect.appendChild(option)
+							if (player.id == PLAYERID && i < stats.length - 1) {
+								var dragger = document.createElement("div")
+									dragger.className = "setup-player-dragger"
+									dragger.setAttribute("statistics", stats[i] + "," + stats[i + 1])
+									dragger.setAttribute("tabindex", 0)
+									dragger.addEventListener(TRIGGERS.mousedown, startDragging)
+								bar.appendChild(dragger)
 							}
 						}
 
@@ -406,6 +403,99 @@ window.addEventListener("load", function() {
 			}
 	
 	/*** interaction ***/
+		/* startDragging */
+			function startDragging(event) {
+				try {
+					// not dragger
+						if (event.target.className !== "setup-player-dragger") {
+							return
+						}
+
+					// select
+						ELEMENTS.dragging = event.target
+				} catch (error) {console.log(error)}
+			}
+
+		/* moveDragging */
+			ELEMENTS.body.addEventListener(TRIGGERS.mousemove, moveDragging)
+			function moveDragging(event) {
+				try {
+					// not dragger
+						if (!ELEMENTS.dragging) {
+							return
+						}
+
+					// get parent
+						var parentElement = ELEMENTS.dragging.closest(".setup-player-bar")
+						var rect = parentElement.getBoundingClientRect()
+
+					// get coordinate
+						var x = event.touches ? event.touches[0].clientX : event.clientX
+						var percentage = Math.max(0, Math.min(100, Math.round((x - rect.left) / rect.width * 100)))
+						
+					// statistics
+						var theseStatistics = ELEMENTS.dragging.getAttribute("statistics").split(",")
+						var currentStatistics = JSON.parse(parentElement.getAttribute("statistics"))
+
+					// get total before and after
+						var beforeTotal = 0
+						var afterTotal = 0
+						var side = "before"
+						for (var i in currentStatistics) {
+							if (i == theseStatistics[0] || i == theseStatistics[1]) {
+								side = "after"
+							}
+							else if (side == "before") {
+								beforeTotal += Number(currentStatistics[i]) * 10
+							}
+							else {
+								afterTotal += Number(currentStatistics[i]) * 10
+							}
+						}
+
+					// new values
+						var newLeftValue = percentage - beforeTotal
+						var newRightValue = 100 - afterTotal - percentage
+
+						if (10 <= newLeftValue  && newLeftValue  <= 30
+						 && 10 <= newRightValue && newRightValue <= 30) {
+						 	// resize
+						 		parentElement.querySelector(".setup-player-minibar[statistic='" + theseStatistics[0] + "']").style.width = (percentage - beforeTotal) + "%"
+						 		parentElement.querySelector(".setup-player-minibar[statistic='" + theseStatistics[1] + "']").style.width = (100 - afterTotal - percentage) + "%"
+							
+							// different?
+								newLeftValue  = Math.round(newLeftValue / 10)
+								newRightValue = Math.round(newRightValue / 10)
+
+								if (currentStatistics[theseStatistics[0]] !== newLeftValue && currentStatistics[theseStatistics[1]] !== newRightValue) {
+									if (newLeftValue < currentStatistics[theseStatistics[0]]) {
+										SOCKET.send(JSON.stringify({action: "updateOption", playerId: PLAYERID, gameId: GAME.id, section: "player", field: theseStatistics[0], value: newLeftValue}))
+										SOCKET.send(JSON.stringify({action: "updateOption", playerId: PLAYERID, gameId: GAME.id, section: "player", field: theseStatistics[1], value: newRightValue}))
+									}
+									else {
+										SOCKET.send(JSON.stringify({action: "updateOption", playerId: PLAYERID, gameId: GAME.id, section: "player", field: theseStatistics[1], value: newRightValue}))
+										SOCKET.send(JSON.stringify({action: "updateOption", playerId: PLAYERID, gameId: GAME.id, section: "player", field: theseStatistics[0], value: newLeftValue}))
+									}
+								}
+						}
+				} catch (error) {console.log(error)}
+			}
+
+		/* stopDragging */
+			ELEMENTS.body.addEventListener(TRIGGERS.mouseup, stopDragging)
+			function stopDragging(event) {
+				try {
+					// not dragger
+						if (!ELEMENTS.dragging) {
+							return
+						}
+
+					// unselect
+						ELEMENTS.dragging.blur()
+						ELEMENTS.dragging = null
+				} catch (error) {console.log(error)}
+			}
+
 		/* updateOption */
 			for (var i in ELEMENTS.setup.game) { ELEMENTS.setup.game[i].addEventListener("change", updateOption) }
 			function updateOption(event) {

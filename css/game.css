@@ -87,7 +87,7 @@
 			margin-right: var(--small-gap-size);
 			overflow-x: hidden;
 			overflow-y: scroll;
-			max-height: calc(100vh - 2 * var(--medium-gap-size) - var(--huge-font-size) - 2 * var(--medium-gap-size) - 5 * var(--small-gap-size));
+			height: calc(100vh - 4 * var(--medium-gap-size) - var(--huge-font-size) - 2 * var(--medium-gap-size) - 5 * var(--small-gap-size));
 		}
 
 		.setup-player {
@@ -100,6 +100,71 @@
 
 		.setup-player:last-child {
 			margin-bottom: 0;
+		}
+
+		.setup-player-bar {
+			float: left;
+			width: 100%;
+			height: auto;
+			border-radius: var(--border-radius);
+			background-color: var(--light-purple);
+			overflow: hidden;
+		}
+
+		.setup-player-minibar {
+			float: left;
+			width: 20%;
+			height: var(--small-font-size);
+			padding: var(--medium-gap-size) 0;
+			color: var(--dark-gray);
+			font-size: var(--small-font-size);
+			text-align: center;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			line-height: 1;
+			text-align: center;
+			user-select: none;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			-o-user-select: none;
+			z-index: 2;
+			pointer-events: none;
+		}
+
+		.setup-player-dragger {
+			float: left;
+			height: calc(2 * var(--medium-gap-size) + var(--small-font-size));
+			width: var(--small-gap-size);
+			background-color: var(--medium-gray);
+			cursor: pointer;
+			outline: none;
+			margin-left: calc(-1 * var(--small-gap-size));
+			z-index: 3;
+		}
+
+		.setup-player-dragger:hover, .setup-player-dragger:focus {
+			box-shadow: 0 0 var(--shadow-size) var(--light-gray) inset;
+		}
+
+		.setup-player-minibar[statistic="speed"] {
+			background-color: var(--light-yellow);
+		}
+
+		.setup-player-minibar[statistic="strength"] {
+			background-color: var(--light-red);
+		}
+
+		.setup-player-minibar[statistic="laser"] {
+			background-color: var(--light-blue);
+		}
+
+		.setup-player-minibar[statistic="recovery"] {
+			background-color: var(--light-green);
+		}
+
+		.setup-player-minibar[statistic="vision"] {
+			background-color: var(--light-purple);
 		}
 
 	/* team */
@@ -135,6 +200,7 @@
 		margin: 0;
 		z-index: 0;
 		pointer-events: none;
+		cursor: none;
 	}
 
 	body[mode="setup"] #map {
