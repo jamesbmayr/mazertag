@@ -1,22 +1,3 @@
-/*** mobile ***/
-	@media screen and (max-width: 950px) {
-		:root {
-			--desktop-modifier: 0;
-		}
-	}
-
-	@media screen and (min-width: 951px) and (max-width: 1250px) {
-		:root {
-			--desktop-modifier: 1;
-		}
-	}
-
-	@media screen and (min-width: 1251px) {
-		:root {
-			--desktop-modifier: 2;
-		}
-	}
-
 /*** setup ***/
 	#setup {
 		z-index: 1;
@@ -25,6 +6,8 @@
 		width: calc(100vw - 2 * var(--medium-gap-size));
 		height: calc(100vh - 2 * var(--medium-gap-size));
 		background-color: var(--light-gray);
+		overflow-x: hidden;
+		overflow-y: scroll;
 	}
 
 	body:not([mode="setup"]) #setup {
@@ -33,13 +16,33 @@
 	}
 
 	/* global */
+		.setup-column {
+			float: left;
+			width: calc(50% - var(--medium-gap-size) / 2);
+		}
+
+		.setup-column:last-child {
+			margin-left: var(--medium-gap-size);
+		}
+
+		@media screen and (max-width: 999px) {
+			.setup-column {
+				width: 100%;
+				margin-left: 0 !important;
+			}
+		}
+
 		.setup-section {
 			background-color: var(--medium-gray);
 			border-radius: calc(1.5 * var(--border-radius));
 			padding: var(--medium-gap-size);
 			float: left;
-			width: calc(50vw - 3 * var(--medium-gap-size) - var(--small-gap-size));
+			width: calc(100% - 2 * var(--medium-gap-size));
 			margin-bottom: var(--medium-gap-size);
+		}
+
+		.setup-section:last-child {
+			margin-bottom: 0;
 		}
 
 	/* launch */
@@ -49,14 +52,17 @@
 
 		#setup-launch-button {
 			font-size: var(--huge-font-size);
-			height: calc(var(--huge-font-size) + 3 * (var(--small-gap-size)));
+			min-height: calc(var(--huge-font-size) + 3 * (var(--small-gap-size)));
+			height: auto;
 			margin: 0;
 			border-radius: calc(1.5 * var(--border-radius));
 		}
 
-	/* game */
-		#setup-game, #setup-controls {
-			margin-left: var(--small-gap-size);
+	/* controls */
+		@media screen and (max-width: 999px) {
+			#setup-controls {
+				display: none;
+			}
 		}
 
 		#setup-controls label {
@@ -83,11 +89,12 @@
 		}
 
 	/* players */
-		#setup-players {
-			margin-right: var(--small-gap-size);
-			overflow-x: hidden;
-			overflow-y: scroll;
-			height: calc(100vh - 4 * var(--medium-gap-size) - var(--huge-font-size) - 2 * var(--medium-gap-size) - 5 * var(--small-gap-size));
+		@media screen and (min-height: 640px) {
+			#setup-players {
+				overflow-x: hidden;
+				overflow-y: scroll;
+				max-height: calc(100vh - 7 * var(--medium-gap-size) - 3 * var(--small-gap-size) - var(--huge-font-size));
+			}
 		}
 
 		.setup-player {
@@ -207,6 +214,110 @@
 		display: none;
 		pointer-events: none;
 	}
+
+/*** mobile controls ***/
+	#mobile-controls {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+	}
+
+	body:not([mode="game"]) #mobile-controls {
+		display: none;
+		pointer-events: none;
+	}
+
+	@media screen and (min-width: 1000px) {
+		#mobile-controls {
+			display: none;
+			pointer-events: none;
+		}
+	}
+
+	#mobile-controls-directions {
+		position: absolute;
+		bottom: var(--medium-gap-size);
+		left: var(--medium-gap-size);
+		width: calc(3 * 2 * var(--large-gap-size));
+	}
+
+	#mobile-controls-actions {
+		position: absolute;
+		bottom: var(--medium-gap-size);
+		right: var(--medium-gap-size);
+	}
+
+	/* button */
+		.mobile-controls-button {
+			float: left;
+			height: calc(2 * var(--large-gap-size));
+			width: calc(2 * var(--large-gap-size));
+			border-radius: var(--border-radius) var(--border-radius) 0 0;
+			outline: none;
+			border: none;
+			background-color: var(--light-gray);
+			color: var(--medium-gray);
+			font-weight: bold;
+			font-size: var(--large-font-size);
+			text-align: center;
+			margin: 0;
+			opacity: 0.2;
+		}
+
+	/* directions */
+		#mobile-controls-up-left {
+			transform: translateX(calc(var(--medium-gap-size))) translateY(calc(var(--medium-gap-size))) rotate(-45deg);
+		}
+
+		#mobile-controls-up {
+			transform: rotate(0deg);
+		}
+
+		#mobile-controls-up-right {
+			transform: translateX(calc(-1 * var(--medium-gap-size))) translateY(calc(var(--medium-gap-size))) rotate(45deg);
+		}
+
+		#mobile-controls-left {
+			transform: rotate(-90deg);
+		}
+
+		#mobile-controls-center {
+			transform: rotate(0deg);
+			border-radius: 0;
+			pointer-events: none;
+		}
+
+		#mobile-controls-right {
+			transform: rotate(90deg);
+		}
+
+		#mobile-controls-down-left {
+			transform: translateX(calc(var(--medium-gap-size))) translateY(calc(-1 * var(--medium-gap-size)))  rotate(-135deg);
+		}
+
+		#mobile-controls-down {
+			transform: rotate(180deg);
+		}
+
+		#mobile-controls-down-right {
+			transform: translateX(calc(-1 * var(--medium-gap-size))) translateY(calc(-1 * var(--medium-gap-size))) rotate(135deg);
+		}
+
+		#mobile-controls-ccw {
+			transform: rotate(-90deg);
+			margin-top: calc(2 * var(--large-gap-size));
+		}
+
+		#mobile-controls-space {
+			height: calc(6 * var(--large-gap-size));
+			border-radius: var(--border-radius);
+		}
+
+		#mobile-controls-cw {
+			transform: rotate(90deg);
+			margin-top: calc(2 * var(--large-gap-size));
+		}
 
 /*** again ***/
 	#again {

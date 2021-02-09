@@ -59,6 +59,19 @@ window.addEventListener("load", function() {
 					players: {
 						element: document.querySelector("#setup-players")
 					}
+				},
+				mobileControls: {
+					"up-left": document.querySelector("#mobile-controls-up-left"),
+					"up": document.querySelector("#mobile-controls-up"),
+					"up-right": document.querySelector("#mobile-controls-up-right"),
+					"left": document.querySelector("#mobile-controls-left"),
+					"right": document.querySelector("#mobile-controls-right"),
+					"down-left": document.querySelector("#mobile-controls-down-left"),
+					"down": document.querySelector("#mobile-controls-down"),
+					"down-right": document.querySelector("#mobile-controls-down-right"),
+					"ccw": document.querySelector("#mobile-controls-ccw"),
+					"space": document.querySelector("#mobile-controls-space"),
+					"cw": document.querySelector("#mobile-controls-cw")
 				}
 			}
 
@@ -531,6 +544,7 @@ window.addEventListener("load", function() {
 			}
 
 		/* pressKey */
+			for (var i in ELEMENTS.mobileControls) { ELEMENTS.mobileControls[i].addEventListener(TRIGGERS.mousedown, pressKey) }
 			window.addEventListener(TRIGGERS.keydown, pressKey)
 			function pressKey(event) {
 				try {
@@ -544,39 +558,38 @@ window.addEventListener("load", function() {
 							return
 						}
 
+					// button
+						if (event.target && event.target.className == "mobile-controls-button") {
+							var mobileControls = event.target.id.replace("mobile-controls-", "").split("-")
+						}
+
 					// get key
-						if (event.key == "ArrowUp" || event.key.toLowerCase() == "w") {
+						if ((event.key && (event.key == "ArrowUp" || event.key.toLowerCase() == "w")) || (mobileControls && mobileControls.includes("up"))) {
 							SOCKET.send(JSON.stringify({action: "pressKey", playerId: PLAYERID, gameId: GAME.id, key: "up"}))
-							return
 						}
-						if (event.key == "ArrowRight" || event.key.toLowerCase() == "d") {
+						if ((event.key && (event.key == "ArrowRight" || event.key.toLowerCase() == "d")) || (mobileControls && mobileControls.includes("right"))) {
 							SOCKET.send(JSON.stringify({action: "pressKey", playerId: PLAYERID, gameId: GAME.id, key: "right"}))
-							return
 						}
-						if (event.key == "ArrowDown" || event.key.toLowerCase() == "s") {
+						if ((event.key && (event.key == "ArrowDown" || event.key.toLowerCase() == "s")) || (mobileControls && mobileControls.includes("down"))) {
 							SOCKET.send(JSON.stringify({action: "pressKey", playerId: PLAYERID, gameId: GAME.id, key: "down"}))
-							return
 						}
-						if (event.key == "ArrowLeft" || event.key.toLowerCase() == "a") {
+						if ((event.key && (event.key == "ArrowLeft" || event.key.toLowerCase() == "a")) || (mobileControls && mobileControls.includes("left"))) {
 							SOCKET.send(JSON.stringify({action: "pressKey", playerId: PLAYERID, gameId: GAME.id, key: "left"}))
-							return
 						}
-						if (event.key == " " || event.code == "Space") {
+						if ((event.key && (event.key == " " || event.code == "Space")) || (mobileControls && mobileControls.includes("space"))) {
 							SOCKET.send(JSON.stringify({action: "pressKey", playerId: PLAYERID, gameId: GAME.id, key: "space"}))
-							return
 						}
-						if (event.key == "[" || event.code == "BracketLeft" || event.key == "," || event.code == "Comma") {
+						if ((event.key && (event.key == "[" || event.code == "BracketLeft" || event.key == "," || event.code == "Comma")) || (mobileControls && mobileControls.includes("ccw"))) {
 							SOCKET.send(JSON.stringify({action: "pressKey", playerId: PLAYERID, gameId: GAME.id, key: "ccw"}))
-							return
 						}
-						if (event.key == "]" || event.code == "BracketRight" || event.key == "." || event.code == "Period") {
+						if ((event.key && (event.key == "]" || event.code == "BracketRight" || event.key == "." || event.code == "Period")) || (mobileControls && mobileControls.includes("cw"))) {
 							SOCKET.send(JSON.stringify({action: "pressKey", playerId: PLAYERID, gameId: GAME.id, key: "cw"}))
-							return
 						}
 				} catch (error) {console.log(error)}
 			}
 
 		/* liftKey */
+			for (var i in ELEMENTS.mobileControls) { ELEMENTS.mobileControls[i].addEventListener(TRIGGERS.mouseup, liftKey) }
 			window.addEventListener(TRIGGERS.keyup, liftKey)
 			function liftKey(event) {
 				try {
@@ -590,34 +603,32 @@ window.addEventListener("load", function() {
 							return
 						}
 
+					// button
+						if (event.target && event.target.className == "mobile-controls-button") {
+							var mobileControls = event.target.id.replace("mobile-controls-", "").split("-")
+						}
+
 					// get key
-						if (event.key == "ArrowUp" || event.key.toLowerCase() == "w") {
+						if ((event.key && (event.key == "ArrowUp" || event.key.toLowerCase() == "w")) || (mobileControls && mobileControls.includes("up"))) {
 							SOCKET.send(JSON.stringify({action: "liftKey", playerId: PLAYERID, gameId: GAME.id, key: "up"}))
-							return
 						}
-						if (event.key == "ArrowRight" || event.key.toLowerCase() == "d") {
+						if ((event.key && (event.key == "ArrowRight" || event.key.toLowerCase() == "d")) || (mobileControls && mobileControls.includes("right"))) {
 							SOCKET.send(JSON.stringify({action: "liftKey", playerId: PLAYERID, gameId: GAME.id, key: "right"}))
-							return
 						}
-						if (event.key == "ArrowDown" || event.key.toLowerCase() == "s") {
+						if ((event.key && (event.key == "ArrowDown" || event.key.toLowerCase() == "s")) || (mobileControls && mobileControls.includes("down"))) {
 							SOCKET.send(JSON.stringify({action: "liftKey", playerId: PLAYERID, gameId: GAME.id, key: "down"}))
-							return
 						}
-						if (event.key == "ArrowLeft" || event.key.toLowerCase() == "a") {
+						if ((event.key && (event.key == "ArrowLeft" || event.key.toLowerCase() == "a")) || (mobileControls && mobileControls.includes("left"))) {
 							SOCKET.send(JSON.stringify({action: "liftKey", playerId: PLAYERID, gameId: GAME.id, key: "left"}))
-							return
 						}
-						if (event.key == " " || event.code == "Space") {
+						if ((event.key && (event.key == " " || event.code == "Space")) || (mobileControls && mobileControls.includes("space"))) {
 							SOCKET.send(JSON.stringify({action: "liftKey", playerId: PLAYERID, gameId: GAME.id, key: "space"}))
-							return
 						}
-						if (event.key == "[" || event.code == "BracketLeft" || event.key == "," || event.code == "Comma") {
+						if ((event.key && (event.key == "[" || event.code == "BracketLeft" || event.key == "," || event.code == "Comma")) || (mobileControls && mobileControls.includes("ccw"))) {
 							SOCKET.send(JSON.stringify({action: "liftKey", playerId: PLAYERID, gameId: GAME.id, key: "ccw"}))
-							return
 						}
-						if (event.key == "]" || event.code == "BracketRight" || event.key == "." || event.code == "Period") {
+						if ((event.key && (event.key == "]" || event.code == "BracketRight" || event.key == "." || event.code == "Period")) || (mobileControls && mobileControls.includes("cw"))) {
 							SOCKET.send(JSON.stringify({action: "liftKey", playerId: PLAYERID, gameId: GAME.id, key: "cw"}))
-							return
 						}
 				} catch (error) {console.log(error)}
 			}

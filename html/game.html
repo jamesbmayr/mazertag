@@ -19,97 +19,119 @@
 					<button id="setup-launch-button">launch game [<script node>REQUEST.path[REQUEST.path.length - 1]</script>node>]</button>
 				</label>
 			</form>
-			<div id="setup-players" class="setup-section">
-				<h2 class="setup-heading">players</h2>
+			<div class="setup-column">
+				<div id="setup-game" class="setup-section">
+					<h2 class="setup-heading">game</h2>
+					<label class="setup-row">
+						<span>mode</span>
+						<select id="setup-game-mode" class="setup-select"><script node>
+							var options = ""
+							for (var i in mapSetup.mode) {
+								options += '<option value="' + mapSetup.mode[i].value + '">' + mapSetup.mode[i].name + '</option>'
+							}
+							options
+						</script>node></select>
+					</label>
+					<label class="setup-row">
+						<span>time</span>
+						<select id="setup-game-time" class="setup-select"><script node>
+							var options = ""
+							for (var i in mapSetup.time) {
+								options += '<option value="' + mapSetup.time[i].value + '">' + mapSetup.time[i].name + '</option>'
+							}
+							options
+						</script>node></select>
+					</label>
+					<label class="setup-row">
+						<span>size</span>
+						<select id="setup-game-size" class="setup-select"><script node>
+							var options = ""
+							for (var i in mapSetup.size) {
+								options += '<option value="' + mapSetup.size[i].value + '">' + mapSetup.size[i].name + '</option>'
+							}
+							options
+						</script>node></select>
+					</label>
+					<label class="setup-row">
+						<span>windows</span>
+						<select id="setup-game-windows" class="setup-select"><script node>
+							var options = ""
+							for (var i in mapSetup.windows) {
+								options += '<option value="' + mapSetup.windows[i].value + '">' + mapSetup.windows[i].name + '</option>'
+							}
+							options
+						</script>node></select>
+					</label>
+					<label class="setup-row">
+						<span>mirrors</span>
+						<select id="setup-game-mirrors" class="setup-select"><script node>
+							var options = ""
+							for (var i in mapSetup.mirrors) {
+								options += '<option value="' + mapSetup.mirrors[i].value + '">' + mapSetup.mirrors[i].name + '</option>'
+							}
+							options
+						</script>node></select>
+					</label>
+					<label class="setup-row">
+						<span>teleporters</span>
+						<select id="setup-game-teleporters" class="setup-select"><script node>
+							var options = ""
+							for (var i in mapSetup.teleporters) {
+								options += '<option value="' + mapSetup.teleporters[i].value + '">' + mapSetup.teleporters[i].name + '</option>'
+							}
+							options
+						</script>node></select>
+					</label>
+					<label class="setup-row">
+						<span>obstacles</span>
+						<select id="setup-game-obstacles" class="setup-select"><script node>
+							var options = ""
+							for (var i in mapSetup.obstacles) {
+								options += '<option value="' + mapSetup.obstacles[i].value + '">' + mapSetup.obstacles[i].name + '</option>'
+							}
+							options
+						</script>node></select>
+					</label>
+				</div>
+				<div id="setup-controls" class="setup-section">
+					<h2 class="setup-heading">controls</h2>
+					<label class="setup-row">
+						<span>movement</span>
+						<b>W</b><b>A</b><b>S</b><b>D</b> | <b>&uarr;</b><b>&larr;</b><b>&darr;</b><b>&rarr;</b>
+					</label>
+					<label class="setup-row">
+						<span>rotation</span>
+						<b>[</b><b>]</b> | <b>,</b><b>.</b>
+					</label>
+					<label class="setup-row">
+						<span>laser</span>
+						<b>SPACE</b>
+					</label>
+					</ul>
+				</div>
 			</div>
-			<div id="setup-game" class="setup-section">
-				<h2 class="setup-heading">game</h2>
-				<label class="setup-row">
-					<span>mode</span>
-					<select id="setup-game-mode" class="setup-select"><script node>
-						var options = ""
-						for (var i in mapSetup.mode) {
-							options += '<option value="' + mapSetup.mode[i].value + '">' + mapSetup.mode[i].name + '</option>'
-						}
-						options
-					</script>node></select>
-				</label>
-				<label class="setup-row">
-					<span>time</span>
-					<select id="setup-game-time" class="setup-select"><script node>
-						var options = ""
-						for (var i in mapSetup.time) {
-							options += '<option value="' + mapSetup.time[i].value + '">' + mapSetup.time[i].name + '</option>'
-						}
-						options
-					</script>node></select>
-				</label>
-				<label class="setup-row">
-					<span>size</span>
-					<select id="setup-game-size" class="setup-select"><script node>
-						var options = ""
-						for (var i in mapSetup.size) {
-							options += '<option value="' + mapSetup.size[i].value + '">' + mapSetup.size[i].name + '</option>'
-						}
-						options
-					</script>node></select>
-				</label>
-				<label class="setup-row">
-					<span>windows</span>
-					<select id="setup-game-windows" class="setup-select"><script node>
-						var options = ""
-						for (var i in mapSetup.windows) {
-							options += '<option value="' + mapSetup.windows[i].value + '">' + mapSetup.windows[i].name + '</option>'
-						}
-						options
-					</script>node></select>
-				</label>
-				<label class="setup-row">
-					<span>mirrors</span>
-					<select id="setup-game-mirrors" class="setup-select"><script node>
-						var options = ""
-						for (var i in mapSetup.mirrors) {
-							options += '<option value="' + mapSetup.mirrors[i].value + '">' + mapSetup.mirrors[i].name + '</option>'
-						}
-						options
-					</script>node></select>
-				</label>
-				<label class="setup-row">
-					<span>teleporters</span>
-					<select id="setup-game-teleporters" class="setup-select"><script node>
-						var options = ""
-						for (var i in mapSetup.teleporters) {
-							options += '<option value="' + mapSetup.teleporters[i].value + '">' + mapSetup.teleporters[i].name + '</option>'
-						}
-						options
-					</script>node></select>
-				</label>
-				<label class="setup-row">
-					<span>obstacles</span>
-					<select id="setup-game-obstacles" class="setup-select"><script node>
-						var options = ""
-						for (var i in mapSetup.obstacles) {
-							options += '<option value="' + mapSetup.obstacles[i].value + '">' + mapSetup.obstacles[i].name + '</option>'
-						}
-						options
-					</script>node></select>
-				</label>
+			<div class="setup-column">
+				<div id="setup-players" class="setup-section">
+					<h2 class="setup-heading">players</h2>
+				</div>
 			</div>
-			<div id="setup-controls" class="setup-section">
-				<h2 class="setup-heading">controls</h2>
-				<label class="setup-row">
-					<span>movement</span>
-					<b>W</b><b>A</b><b>S</b><b>D</b> or <b>&uarr;</b><b>&larr;</b><b>&darr;</b><b>&rarr;</b>
-				</label>
-				<label class="setup-row">
-					<span>rotation</span>
-					<b>[</b><b>]</b> or <b>,</b><b>.</b>
-				</label>
-				<label class="setup-row">
-					<span>laser</span>
-					<b>SPACE</b>
-				</label>
-				</ul>
+		</div>
+		<div id="mobile-controls">
+			<div id="mobile-controls-directions">
+				<button id="mobile-controls-up-left" class="mobile-controls-button">&uarr;</button>
+				<button id="mobile-controls-up" class="mobile-controls-button">&uarr;</button>
+				<button id="mobile-controls-up-right" class="mobile-controls-button">&uarr;</button>
+				<button id="mobile-controls-left" class="mobile-controls-button">&uarr;</button>
+				<button id="mobile-controls-center" class="mobile-controls-button"></button>
+				<button id="mobile-controls-right" class="mobile-controls-button">&uarr;</button>
+				<button id="mobile-controls-down-left" class="mobile-controls-button">&uarr;</button>
+				<button id="mobile-controls-down" class="mobile-controls-button">&uarr;</button>
+				<button id="mobile-controls-down-right" class="mobile-controls-button">&uarr;</button>
+			</div>
+			<div id="mobile-controls-actions">
+				<button id="mobile-controls-ccw" class="mobile-controls-button">&olarr;</button>
+				<button id="mobile-controls-space" class="mobile-controls-button">!</button>
+				<button id="mobile-controls-cw" class="mobile-controls-button">&orarr;</button>
 			</div>
 		</div>
 		<div id="again">
