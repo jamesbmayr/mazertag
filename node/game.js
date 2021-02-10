@@ -182,13 +182,13 @@
 
 						// new player --> send full game
 							if (playerId) {
-								callback({gameId: game.id, success: true, message: null, playerId: playerId, launch: (game.status.startTime ? true : false), game: game, recipients: [REQUEST.session.id]})
+								callback({gameId: game.id, success: true, message: null, playerId: playerId, launch: (game.status.startTime ? true : false), game: game, audio: CORE.getAsset("audio"), recipients: [REQUEST.session.id]})
 								return
 							}
 
 						// existing spectator
 							if (game.spectators[REQUEST.session.id]) {
-								callback({gameId: game.id, success: true, message: "now observing the game", playerId: null, launch: (game.status.startTime ? true : false), game: game, recipients: [REQUEST.session.id]})
+								callback({gameId: game.id, success: true, message: "now observing the game", playerId: null, launch: (game.status.startTime ? true : false), game: game, audio: CORE.getAsset("audio"), recipients: [REQUEST.session.id]})
 								return
 							}
 
@@ -214,7 +214,7 @@
 										}
 
 										// for this spectator
-											callback({gameId: game.id, success: true, message: "now observing the game", playerId: null, launch: (game.status.startTime ? true : false), game: game, recipients: [REQUEST.session.id]})
+											callback({gameId: game.id, success: true, message: "now observing the game", playerId: null, launch: (game.status.startTime ? true : false), game: game, audio: CORE.getAsset("audio"), recipients: [REQUEST.session.id]})
 									})
 							}
 					})
@@ -551,7 +551,7 @@
 								recipients.push(game.players[i].sessionId)
 							}
 							for (var i in game.spectators) {
-								recipients.push(game.spectators[i].sessionId)
+								recipients.push(i)
 							}
 
 						// send game data to everyone
@@ -1161,9 +1161,13 @@
 								// message
 									calculateMessage(game)
 
-								// calculate cooldowns --> acceleration --> velocity --> position
+								// calculate cooldowns / sound effects
 									for (var i in game.players) {
 										calculateCooldowns(game, game.players[i])
+									}
+
+								// acceleration --> velocity --> position
+									for (var i in game.players) {
 										calculateAcceleration(game, game.players[i])
 										calculateVelocity(game, game.players[i])
 										calculatePosition(game, game.players[i])
@@ -1343,6 +1347,11 @@
 					for (var i in player.status.cooldowns) {
 						player.status.cooldowns[i] = Math.max(0, player.status.cooldowns[i] - 1)
 					}
+
+				// sound effects
+					for (var i in player.status.sfx) {
+						player.status.sfx[i] = false
+					}
 			}
 			catch (error) {
 				CORE.logError(error)
@@ -1518,6 +1527,7 @@
 
 				// collision?
 					if (collision) {
+						player.status.sfx.collisionWall = true
 						var speed = getTriangleSide(player.status.velocity.x, player.status.velocity.y, null)
 						if (player.status.energy >= player.options.minimumEnergyForLaser) {
 							player.status.energy = Math.max(player.options.minimumEnergyForLaser, Math.min(player.options.maximumEnergy, player.status.energy - Math.round(speed / 2)))
@@ -1551,6 +1561,8 @@
 
 								// game mode: collect_the_orbs
 									if (game.status.mode == "collect_the_orbs" && item.options.name == "orb") {
+										player.status.sfx.collisionOrb = true
+
 										game.status.orbs[player.status.team]++
 										game.status.message = player.name + " COLLECTS ORB"
 										game.status.messageTimeRemaining = CONSTANTS.messageDuration
@@ -1562,6 +1574,8 @@
 
 								// game mode: capture_the_hat
 									if (game.status.mode == "capture_the_hat" && item.options.name == "orb" && !player.status.cooldowns.invincibility) {
+										player.status.sfx.collisionOrb = true
+
 										player.status.isIt = true
 										game.status.message = player.name + " CAPTURES THE HAT"
 										game.status.messageTimeRemaining = CONSTANTS.messageDuration
@@ -1573,6 +1587,8 @@
 
 								// obstacle
 									if (item.options.name == "obstacle") {
+										player.status.sfx.collisionObstacle = true
+
 										// trig
 											var cosOverlapA = Math.cos(overlap.a * CONSTANTS.radiansConversion)
 											var sinOverlapA = Math.sin(overlap.a * CONSTANTS.radiansConversion)
@@ -1598,6 +1614,8 @@
 
 								// teleporter
 									if (item.options.name == "teleporter" && !player.status.cooldowns.teleport) {
+										player.status.sfx.collisionTeleporter = true
+
 										// filtered list
 											var cellX = Math.round(newX / game.map.options.cellsize)
 											var cellY = Math.round(newY / game.map.options.cellsize)
@@ -1653,6 +1671,8 @@
 									var tempSpeed = getTriangleSide(tempVX, tempVY, null)
 
 								// bump back self
+									player.status.sfx.collisionPlayer = true
+
 									player.status.position.x += overlap.d * cosOverlapA
 									player.status.position.y += overlap.d * sinOverlapA
 									player.status.velocity.x = thatPlayer.status.velocity.x * thatPlayer.options.bump
@@ -1662,6 +1682,8 @@
 									}
 
 								// push
+									thatPlayer.status.sfx.collisionPlayer = true
+
 									thatPlayer.status.position.x -= overlap.d * cosOverlapA
 									thatPlayer.status.position.y -= overlap.d * sinOverlapA
 									thatPlayer.status.velocity.x = tempVX * player.options.bump
@@ -1673,6 +1695,8 @@
 								// game mode: classic_tag
 									if (game.status.mode == "classic_tag") {
 										if (player.status.isIt && !thatPlayer.status.energy) {
+											thatPlayer.status.sfx.noEnergy = true
+
 											thatPlayer.status.isIt = true
 											thatPlayer.options.minimumEnergyFromDamage = player.options.minimumEnergyFromDamage
 
@@ -1684,6 +1708,8 @@
 											game.status.messageTimeRemaining = CONSTANTS.messageDuration
 										}
 										else if (thatPlayer.status.isIt && !player.status.energy) {
+											player.status.sfx.noEnergy = true
+
 											player.status.isIt = true
 											player.options.minimumEnergyFromDamage = thatPlayer.options.minimumEnergyFromDamage
 
@@ -1699,10 +1725,14 @@
 								// game mode: team_freeze_tag
 									if (game.status.mode == "team_freeze_tag") {
 										if (!thatPlayer.status.energy) {
+											thatPlayer.status.sfx.noEnergy = true
+
 											game.status.message = thatPlayer.name + " IS FROZEN"
 											game.status.messageTimeRemaining = CONSTANTS.messageDuration
 										}
 										else if (!player.status.energy) {
+											player.status.sfx.noEnergy = true
+
 											game.status.message = player.name + " IS FROZEN"
 											game.status.messageTimeRemaining = CONSTANTS.messageDuration
 										}
@@ -1711,6 +1741,8 @@
 								// game mode: capture_the_hat
 									if (game.status.mode == "capture_the_hat") {
 										if (player.status.isIt && !player.status.energy) {
+											player.status.sfx.noEnergy = true
+
 											player.status.isIt = false
 											player.status.cooldowns.invincibility = player.options.invincibilityCooldown
 
@@ -1728,6 +1760,8 @@
 											})
 										}
 										else if (thatPlayer.status.isIt && !thatPlayer.status.energy) {
+											thatPlayer.status.sfx.noEnergy = true
+
 											thatPlayer.status.isIt = false
 											thatPlayer.status.cooldowns.invincibility = thatPlayer.options.invincibilityCooldown
 
@@ -1757,6 +1791,8 @@
 											thatPlayer.status.energy = thatPlayer.options.maximumEnergy
 											thatPlayer.status.cooldowns.invincibility = player.options.invincibilityCooldown
 
+											thatPlayer.status.sfx.noEnergy = true
+
 											game.status.message = player.name + " ZAPS " + thatPlayer.name
 											game.status.messageTimeRemaining = CONSTANTS.messageDuration
 										}
@@ -1768,6 +1804,8 @@
 											player.status.position.y = teamSpawner ? teamSpawner.position.y : (game.map.options.cells.y / 2 * game.map.options.cellsize)
 											player.status.energy = thatPlayer.options.maximumEnergy
 											player.status.cooldowns.invincibility = player.options.invincibilityCooldown
+
+											player.status.sfx.noEnergy = true
 
 											game.status.message = thatPlayer.name + " ZAPS " + player.name
 											game.status.messageTimeRemaining = CONSTANTS.messageDuration
@@ -1951,6 +1989,7 @@
 					}
 
 				// decrease energy
+					player.status.sfx.shootingLaser = true
 					player.status.energy -= player.options.laserEnergy
 
 				// starting angles
@@ -1958,7 +1997,6 @@
 					var cosCurrentA  = Math.cos(currentAngle * CONSTANTS.radiansConversion)
 					var sinCurrentA  = Math.sin(currentAngle * CONSTANTS.radiansConversion)
 					var tanCurrentA  = Math.tan(currentAngle * CONSTANTS.radiansConversion)
-
 
 				// start laser
 					var collision = false
@@ -2050,6 +2088,8 @@
 
 										// game mode: collect_the_orbs
 											if (game.status.mode == "collect_the_orbs" && item.options.name == "orb") {
+												player.status.sfx.collisionOrb = true
+
 												game.status.orbs[player.status.team]++
 												game.status.message = player.name + " COLLECTS ORB"
 												game.status.messageTimeRemaining = CONSTANTS.messageDuration
@@ -2092,17 +2132,21 @@
 
 										// ally
 											if (thatPlayer.status.team == player.status.team && !thatPlayer.status.isIt && !player.status.isIt) {
+												thatPlayer.status.sfx.collisionAllyLaser = true
 												thatPlayer.status.energy = Math.max(thatPlayer.options.minimumEnergyFromDamage, Math.min(thatPlayer.options.maximumEnergy, thatPlayer.status.energy + player.laser[player.laser.length - 1].e))
 												break
 											}
 
 										// opponent
 											if (!thatPlayer.status.cooldowns.invincibility) {
-												thatPlayer.status.energy = Math.max(thatPlayer.options.minimumEnergyFromDamage, Math.min(thatPlayer.options.maximumEnergy, thatPlayer.status.energy - 2 * player.laser[player.laser.length - 1].e))
+												thatPlayer.status.sfx.collisionOpponentLaser = true
+												thatPlayer.status.energy = Math.max(thatPlayer.options.minimumEnergyFromDamage, Math.min(thatPlayer.options.maximumEnergy, thatPlayer.status.energy - player.options.laserAttackMultiplier * player.laser[player.laser.length - 1].e))
 
 												// game mode: classic_tag
 													if (game.status.mode == "classic_tag") {
 														if (player.status.isIt && !thatPlayer.status.energy) {
+															thatPlayer.status.sfx.noEnergy = true
+
 															thatPlayer.status.isIt = true
 															thatPlayer.options.minimumEnergyFromDamage = player.options.minimumEnergyFromDamage
 
@@ -2118,6 +2162,8 @@
 												// game mode: team_freeze_tag
 													if (game.status.mode == "team_freeze_tag") {
 														if (!thatPlayer.status.energy) {
+															thatPlayer.status.sfx.noEnergy = true
+
 															game.status.message = thatPlayer.name + " IS FROZEN"
 															game.status.messageTimeRemaining = CONSTANTS.messageDuration
 														}
@@ -2126,6 +2172,8 @@
 												// game mode: capture_the_hat
 													if (game.status.mode == "capture_the_hat") {
 														if (thatPlayer.status.isIt && !thatPlayer.status.energy) {
+															thatPlayer.status.sfx.noEnergy = true
+
 															thatPlayer.status.isIt = false
 															thatPlayer.status.cooldowns.invincibility = thatPlayer.options.invincibilityCooldown
 
@@ -2154,6 +2202,8 @@
 															thatPlayer.status.position.y = teamSpawner ? teamSpawner.position.y : (game.map.options.cells.y / 2 * game.map.options.cellsize)
 															thatPlayer.status.energy = thatPlayer.options.maximumEnergy
 															thatPlayer.status.cooldowns.invincibility = player.options.invincibilityCooldown
+
+															thatPlayer.status.sfx.noEnergy = true
 
 															game.status.message = player.name + " ZAPS " + thatPlayer.name
 															game.status.messageTimeRemaining = CONSTANTS.messageDuration
@@ -2198,6 +2248,13 @@
 		module.exports.calculateWinner = calculateWinner
 		function calculateWinner(game) {
 			try {
+				// end all SFX
+					for (var i in game.players) {
+						for (var j in game.players[i].status.sfx) {
+							game.players[i].status.sfx[j] = false
+						}
+					}
+
 				// game mode: classic_tag
 					if (game.status.mode == "classic_tag") {
 						// who is it

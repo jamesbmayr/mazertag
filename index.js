@@ -93,21 +93,6 @@
 									catch (error) {_404(REQUEST, RESPONSE, error)}
 								break
 
-								case (/\/banner[.]png$/).test(REQUEST.url):
-									try {
-										RESPONSE.writeHead(200, CORE.constructHeaders(REQUEST))
-										FS.readFile("./assets/banner.png", function (error, file) {
-											if (error) {
-												_404(REQUEST, RESPONSE, error)
-												return
-											}
-											
-											RESPONSE.end(file, "binary")
-										})
-									}
-									catch (error) {_404(REQUEST, RESPONSE, error)}
-								break
-
 							// css
 								case (REQUEST.fileType == "css"):
 									try {

@@ -249,6 +249,17 @@
 									},
 									cooldowns: {
 										teleport: 0
+									},
+									sfx: {
+										collisionOpponentLaser: false,
+										collisionAllyLaser: false,
+										collisionPlayer: false,
+										collisionWall: false,
+										collisionObstacle: false,
+										collisionTeleporter: false,
+										collisionOrb: false,
+										shootingLaser: false,
+										noEnergy: false
 									}
 								},
 								keys: {
@@ -270,9 +281,9 @@
 									friction: [0, 3, 4, 5],
 									angularFriction: 3,
 									maximumVelocity: [0, 12, 16, 20],
-									maximumAngularVelocity: 4,
+									maximumAngularVelocity: 5,
 									acceleration: [0, 4, 5, 6],
-									angularAcceleration: 4,
+									angularAcceleration: 5,
 									bump: [0, 1, 2, 3],
 									teleportCooldown: 20,
 									invincibilityCooldown: 100,
@@ -282,6 +293,7 @@
 									minimumEnergyFromDamage: 0,
 									laserEnergy: [0, 3, 4, 5],
 									laserDissipation: [1, 0.5, 0.25, 0],
+									laserAttackModifier: 3,
 									visionTopToBottom: 3,
 									visionRightToLeft: 1,
 									visionZoom: 1,
@@ -525,6 +537,22 @@
 								"card-size": "80px",
 								"transition-time": "1s"
 							}
+						break
+
+						case "audio":
+							return [
+								"musicMenu",
+								"musicGame",
+								"collisionOpponentLaser",
+								"collisionAllyLaser",
+								"collisionPlayer",
+								"collisionWall",
+								"collisionObstacle",
+								"collisionTeleporter",
+								"collisionOrb",
+								"shootingLaser",
+								"noEnergy"
+							]
 						break
 
 						case "constants":

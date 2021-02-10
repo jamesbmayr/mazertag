@@ -60,6 +60,7 @@ window.addEventListener("load", function() {
 						element: document.querySelector("#setup-players")
 					}
 				},
+				mobileControlsContainer: document.querySelector("#mobile-controls"),
 				mobileControls: {
 					"up-left": document.querySelector("#mobile-controls-up-left"),
 					"up": document.querySelector("#mobile-controls-up"),
@@ -72,7 +73,8 @@ window.addEventListener("load", function() {
 					"ccw": document.querySelector("#mobile-controls-ccw"),
 					"space": document.querySelector("#mobile-controls-space"),
 					"cw": document.querySelector("#mobile-controls-cw")
-				}
+				},
+				audio: {}
 			}
 
 		/* constants */
@@ -83,10 +85,12 @@ window.addEventListener("load", function() {
 				loopTime: 50,
 				rounding: 100,
 				reflectionWedgeWidth: 2,
-				maximumReflections: 4
+				maximumReflections: 4,
+				observerZoom: 0.2
 			}
 
 		/* game */
+			var INTERACTED = false
 			var PLAYERID = null
 			var GAME = null
 			var GAMELOOP = setInterval(displayGame, CONSTANTS.loopTime)
@@ -199,8 +203,16 @@ window.addEventListener("load", function() {
 
 					// data
 						// player id
-							if (data.playerId) {
+							if (data.playerId !== undefined) {
 								PLAYERID = data.playerId
+								if (!PLAYERID) {
+									ELEMENTS.mobileControlsContainer.setAttribute("visibility", false)
+								}
+							}
+
+						// audio
+							if (data.audio) {
+								preloadAudio(data.audio)
 							}
 
 						// launch
@@ -267,11 +279,6 @@ window.addEventListener("load", function() {
 						if (!GAME) {
 							return
 						}
-
-					// no player
-						if (!PLAYERID || !GAME.players[PLAYERID]) {
-							return
-						}
 						
 					// not started
 						if (!GAME.status.startTime) {
@@ -282,9 +289,17 @@ window.addEventListener("load", function() {
 					// draw canvas
 						drawGame(ELEMENTS.canvas, ELEMENTS.context, GAME, GAME.players[PLAYERID])
 
+					// update sounds
+						updateSFX(GAME.players[PLAYERID])
+
 					// done
 						if (GAME.status.endTime) {
 							clearInterval(GAMELOOP)
+
+							if (INTERACTED) {
+								ELEMENTS.audio.musicGame.pause()
+								ELEMENTS.audio.musicMenu.play()
+							}
 						}
 				} catch (error) {console.log(error)}
 			}
@@ -325,6 +340,13 @@ window.addEventListener("load", function() {
 								playerElement.bar.querySelectorAll(".setup-player-minibar").forEach(function(element) {
 									element.style.width = (thatPlayer.setup[element.getAttribute("statistic")] * 10) + "%"
 								})
+							}
+						}
+
+					// play menu music
+						if (INTERACTED) {
+							if (ELEMENTS.audio.musicMenu && ELEMENTS.audio.musicMenu.paused) {
+								ELEMENTS.audio.musicMenu.play()
 							}
 						}
 				} catch (error) {console.log(error)}
@@ -419,9 +441,17 @@ window.addEventListener("load", function() {
 		/* startDragging */
 			function startDragging(event) {
 				try {
+					// set interacted
+						INTERACTED = true
+
 					// not dragger
 						if (event.target.className !== "setup-player-dragger") {
 							return
+						}
+
+					// not a player
+						if (!PLAYERID || !GAME.players[PLAYERID]) {
+							return false
 						}
 
 					// select
@@ -436,6 +466,11 @@ window.addEventListener("load", function() {
 					// not dragger
 						if (!ELEMENTS.dragging) {
 							return
+						}
+
+					// not a player
+						if (!PLAYERID || !GAME.players[PLAYERID]) {
+							return false
 						}
 
 					// get parent
@@ -503,6 +538,11 @@ window.addEventListener("load", function() {
 							return
 						}
 
+					// not a player
+						if (!PLAYERID || !GAME.players[PLAYERID]) {
+							return false
+						}
+
 					// unselect
 						ELEMENTS.dragging.blur()
 						ELEMENTS.dragging = null
@@ -513,6 +553,14 @@ window.addEventListener("load", function() {
 			for (var i in ELEMENTS.setup.game) { ELEMENTS.setup.game[i].addEventListener("change", updateOption) }
 			function updateOption(event) {
 				try {
+					// set interacted
+						INTERACTED = true
+
+					// not a player
+						if (!PLAYERID || !GAME.players[PLAYERID]) {
+							return false
+						}
+
 					// get info
 						var info = event.target.id.split("-")
 						var section = info[1]
@@ -538,6 +586,14 @@ window.addEventListener("load", function() {
 			ELEMENTS.setup.launch.addEventListener("submit", launchGame)
 			function launchGame(event) {
 				try {
+					// set interacted
+						INTERACTED = true
+
+					// not a player
+						if (!PLAYERID || !GAME.players[PLAYERID]) {
+							return false
+						}
+
 					// send update
 						SOCKET.send(JSON.stringify({action: "launchGame", playerId: PLAYERID, gameId: GAME.id}))
 				} catch (error) {console.log(error)}
@@ -548,14 +604,17 @@ window.addEventListener("load", function() {
 			window.addEventListener(TRIGGERS.keydown, pressKey)
 			function pressKey(event) {
 				try {
+					// set interacted
+						INTERACTED = true
+
 					// no game or not started
 						if (!GAME || !GAME.status.startTime) {
 							return
 						}
 
 					// not a player
-						if (!PLAYERID) {
-							return
+						if (!PLAYERID || !GAME.players[PLAYERID]) {
+							return false
 						}
 
 					// button
@@ -593,14 +652,17 @@ window.addEventListener("load", function() {
 			window.addEventListener(TRIGGERS.keyup, liftKey)
 			function liftKey(event) {
 				try {
+					// set interacted
+						INTERACTED = true
+
 					// no game or not started
 						if (!GAME || !GAME.status.startTime) {
 							return
 						}
 
 					// not a player
-						if (!PLAYERID) {
-							return
+						if (!PLAYERID || !GAME.players[PLAYERID]) {
+							return false
 						}
 
 					// button
@@ -653,6 +715,11 @@ window.addEventListener("load", function() {
 		/* getShadowData */
 			function getShadowData(game, player) {
 				try {
+					// no player
+						if (!PLAYERID || !player) {
+							return null
+						}
+
 					// create starting variables
 						var cellsize = game.map.options.cellsize
 						var outerEdge = cellsize * player.options.visibility
@@ -828,20 +895,6 @@ window.addEventListener("load", function() {
 				} catch (error) {console.log(error)}
 			}
 
-		/* drawBackground */
-			function drawBackground(canvas, context, options) {
-				try {
-					// rectangle
-						drawRectangle(canvas, context, {
-							x: canvas.width / 2,
-							y: canvas.height / 2,
-							width: canvas.width,
-							height: canvas.height,
-							color: options.background
-						})
-				} catch (error) {console.log(error)}
-			}
-
 		/* drawShape */
 			function drawShape(canvas, context, options) {
 				try {
@@ -976,10 +1029,8 @@ window.addEventListener("load", function() {
 			function drawGame(canvas, context, game, player) {
 				try {
 					// zoom canvas
-						if (player.options.visionZoom) {
-							canvas.height = window.innerHeight / player.options.visionZoom
-							canvas.width  = window.innerWidth  / player.options.visionZoom
-						}
+						canvas.height = window.innerHeight / (player ? player.options.visionZoom : CONSTANTS.observerZoom)
+						canvas.width  = window.innerWidth  / (player ? player.options.visionZoom : CONSTANTS.observerZoom)
 
 					// clear canvas
 						clearCanvas(canvas, context)
@@ -987,8 +1038,10 @@ window.addEventListener("load", function() {
 					// image dimensions
 						var mapWidth  = game.map.options.cells.x * game.map.options.cellsize
 						var mapHeight = game.map.options.cells.y * game.map.options.cellsize
-						var offsetX = (canvas.width / 2 / player.options.visionRightToLeft) - player.status.position.x
-						var offsetY = (canvas.height / 2 / player.options.visionTopToBottom) - player.status.position.y
+						var offsetX = canvas.width / 2
+							offsetX = player ? (offsetX / player.options.visionRightToLeft) - player.status.position.x : offsetX - mapWidth / 2
+						var offsetY = canvas.height / 2
+							offsetY = player ? (offsetY / player.options.visionTopToBottom) - player.status.position.y : offsetY - mapHeight / 2
 
 					// adjust center to camera
 						translateCanvas(canvas, context, {
@@ -998,43 +1051,58 @@ window.addEventListener("load", function() {
 
 					// rotate around player
 						rotateCanvas(canvas, context, {
-							x: player.status.position.x,
-							y: canvas.height - player.status.position.y,
-							a: player.status.position.a
+							x: player ? player.status.position.x : 0,
+							y: player ? canvas.height - player.status.position.y : 0,
+							a: player ? player.status.position.a : 0
 						}, function() {
 							// compute shadow
 								var shadowData = getShadowData(game, player)
-							
-							// source-over
-								context.globalCompositeOperation = "source-over"
 
-							// draw visible area (gray)
-								drawShape(canvas, context, {
-									color: game.map.options.background,
-									opacity: 1,
-									points: shadowData.visiblePoints
-								})
-
-							// draw thick mirror (gray)
-								for (var i = 0; i < shadowData.mirrorPoints.length; i++) {
-									drawReflectionWedge(canvas, context, {
+							// SPECTATORS ONLY
+								if (!shadowData) {
+									drawRectangle(canvas, context, {
 										color: game.map.options.background,
-										mirror: shadowData.mirrorPoints[i],
-										reflection: shadowData.reflectionPoints[i]
+										opacity: 1,
+										x: mapWidth / 2,
+										y: mapHeight / 2,
+										width: canvas.width,
+										height: canvas.height,
 									})
 								}
 
-							// source-atop
-								context.globalCompositeOperation = "source-atop"
+							// PLAYERS ONLY
+								else {
+									// source-over
+										context.globalCompositeOperation = "source-over"
 
-							// draw background (opaque gray)
-								drawCircle(canvas, context, {
-									color: game.map.options.background,
-									opacity: 1,
-									x: player.status.position.x,
-									y: player.status.position.y,
-									radius: game.map.options.cellsize * player.options.visibility
-								})
+									// draw visible area (gray)
+										drawShape(canvas, context, {
+											color: game.map.options.background,
+											opacity: 1,
+											points: shadowData.visiblePoints
+										})
+
+									// draw thick mirror (gray)
+										for (var i = 0; i < shadowData.mirrorPoints.length; i++) {
+											drawReflectionWedge(canvas, context, {
+												color: game.map.options.background,
+												mirror: shadowData.mirrorPoints[i],
+												reflection: shadowData.reflectionPoints[i]
+											})
+										}
+
+									// source-atop
+										context.globalCompositeOperation = "source-atop"
+
+									// draw background (opaque gray)
+										drawCircle(canvas, context, {
+											color: game.map.options.background,
+											opacity: 1,
+											x: player.status.position.x,
+											y: player.status.position.y,
+											radius: game.map.options.cellsize * player.options.visibility
+										})
+								}
 
 							// draw lasers
 								for (var i in game.players) {
@@ -1051,15 +1119,18 @@ window.addEventListener("load", function() {
 									drawItem(canvas, context, game.items[i], game.map.options)
 								}
 
-							// back to source-over
-								context.globalCompositeOperation = "source-over"
+							// PLAYERS ONLY
+								if (shadowData) {
+									// back to source-over
+										context.globalCompositeOperation = "source-over"
 
-							// draw background (translucent gray)
-								drawShape(canvas, context, {
-									color: game.map.options.background,
-									opacity: game.map.options.shadow.opacity * 2, // darker background shadow
-									points: shadowData.visiblePoints.concat(shadowData.cornerPoints)
-								})
+									// draw background (translucent gray)
+										drawShape(canvas, context, {
+											color: game.map.options.background,
+											opacity: game.map.options.shadow.opacity * 2, // darker background shadow
+											points: shadowData.visiblePoints.concat(shadowData.cornerPoints)
+										})
+								}
 
 							// draw walls
 								for (var x = 0; x < game.map.options.cells.x; x++) {
@@ -1076,26 +1147,29 @@ window.addEventListener("load", function() {
 									}
 								}
 
-							// draw shadows (translucent gray)
-								drawShape(canvas, context, {
-									color: game.map.options.shadow.color,
-									blur: game.map.options.shadow.blur,
-									shadow: game.map.options.shadow.color,
-									opacity: game.map.options.shadow.opacity / 2, // lighter second-layer shadow (to differentiate reflection zones)
-									points: shadowData.visiblePoints.concat(shadowData.cornerPoints)
-								})
+							// PLAYERS ONLY
+								if (shadowData) {
+									// draw shadows (translucent gray)
+										drawShape(canvas, context, {
+											color: game.map.options.shadow.color,
+											blur: game.map.options.shadow.blur,
+											shadow: game.map.options.shadow.color,
+											opacity: game.map.options.shadow.opacity / 2, // lighter second-layer shadow (to differentiate reflection zones)
+											points: shadowData.visiblePoints.concat(shadowData.cornerPoints)
+										})
 
-							// clip circle
-								context.save()
-								context.globalCompositeOperation = "destination-in"
-								drawCircle(canvas, context, {
-									color: game.map.options.shadow.color,
-									opacity: 1,
-									x: player.status.position.x,
-									y: player.status.position.y,
-									radius: game.map.options.cellsize * player.options.visibility
-								})
-								context.restore()
+									// clip circle
+										context.save()
+										context.globalCompositeOperation = "destination-in"
+										drawCircle(canvas, context, {
+											color: game.map.options.shadow.color,
+											opacity: 1,
+											x: player.status.position.x,
+											y: player.status.position.y,
+											radius: game.map.options.cellsize * player.options.visibility
+										})
+										context.restore()
+								}
 						})
 
 					// readjust center for next loop
@@ -1302,6 +1376,93 @@ window.addEventListener("load", function() {
 									opacity: player.options.textOpacity
 								})
 						})
+				} catch (error) {console.log(error)}
+			}
+
+	/*** audio ***/
+		/* preloadAudio */
+			function preloadAudio(soundNames) {
+				try {
+					// loop through all soundNames
+						for (var i in soundNames) {
+							// get file name
+								var soundName = soundNames[i]
+
+							// create audio element that loops this file
+								var audioElement = new Audio()
+									audioElement.loop = true
+									audioElement.src = "/assets/" + soundName + ".mp3"
+
+							// add to list of audio objects
+								ELEMENTS.audio[soundName] = audioElement
+						}
+				} catch (error) {console.log(error)}
+			}
+
+		/* updateSFX */
+			function updateSFX(player) {
+				try {
+					// not interacted yet --> browsers block autoplay
+						if (!INTERACTED) {
+							return
+						}
+
+					// play music
+						if (ELEMENTS.audio.musicGame && ELEMENTS.audio.musicGame.paused) {
+							ELEMENTS.audio.musicMenu.pause()
+							ELEMENTS.audio.musicGame.play()
+						}
+
+					// not a player
+						if (!PLAYERID || !player) {
+							return false
+						}
+
+					// loop through soundNames on player object
+						for (var soundName in player.status.sfx) {
+							// get current status (true / false)
+								var status = player.status.sfx[soundName]
+
+							// audio player not found
+								if (!ELEMENTS.audio[soundName]) {
+									continue
+								}
+
+							// should be playing
+								if (status == true) {
+									// already playing --> keep playing (on a loop)
+										if (!ELEMENTS.audio[soundName].paused) {
+											continue
+										}
+
+									// start from beginning at full volume
+										ELEMENTS.audio[soundName].volume = 1
+										ELEMENTS.audio[soundName].currentTime = 0
+										ELEMENTS.audio[soundName].play()
+										continue
+								}
+
+							// should not be playing
+								if (status == false) {
+									// already stopped
+										if (ELEMENTS.audio[soundName].paused) {
+											continue
+										}
+
+									// volume is 0 --> stop
+										if (ELEMENTS.audio[soundName].volume <= 0.1) {
+											ELEMENTS.audio[soundName].volume = 0
+											ELEMENTS.audio[soundName].pause()
+											continue
+										}
+
+									// still going --> decrease volume
+										if (ELEMENTS.audio[soundName].volume > 0.1) {
+											ELEMENTS.audio[soundName].volume -= 0.1
+											continue
+										}
+								}
+						}
 				} catch (error) {console.log(error)}
 			}
 })
