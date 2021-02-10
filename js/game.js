@@ -296,10 +296,14 @@ window.addEventListener("load", function() {
 						if (GAME.status.endTime) {
 							clearInterval(GAMELOOP)
 
-							if (INTERACTED) {
-								ELEMENTS.audio.musicGame.pause()
-								ELEMENTS.audio.musicMenu.play()
-							}
+							// stop sfx / game music
+								if (INTERACTED) {
+									for (var i in ELEMENTS.audio) {
+										ELEMENTS.audio[i].pause()
+									}
+
+									ELEMENTS.audio.musicMenu.play()
+								}
 						}
 				} catch (error) {console.log(error)}
 			}
