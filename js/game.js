@@ -83,10 +83,11 @@ window.addEventListener("load", function() {
 				circleDegrees: 360,
 				radiansConversion: Math.PI / 180,
 				loopTime: 50,
+				fadeTime: 500,
 				rounding: 100,
 				reflectionWedgeWidth: 2,
 				maximumReflections: 4,
-				observerZoom: 0.2
+				observerZoom: 0.2,
 			}
 
 		/* game */
@@ -299,10 +300,12 @@ window.addEventListener("load", function() {
 							// stop sfx / game music
 								if (INTERACTED) {
 									for (var i in ELEMENTS.audio) {
-										ELEMENTS.audio[i].pause()
+										for (var j in ELEMENTS.audio[i].tracks) {
+											ELEMENTS.audio[i].tracks[j].pause()
+										}
 									}
 
-									ELEMENTS.audio.musicMenu.play()
+									ELEMENTS.audio.musicMenu.tracks._1.play()
 								}
 						}
 				} catch (error) {console.log(error)}
@@ -349,8 +352,8 @@ window.addEventListener("load", function() {
 
 					// play menu music
 						if (INTERACTED) {
-							if (ELEMENTS.audio.musicMenu && ELEMENTS.audio.musicMenu.paused) {
-								ELEMENTS.audio.musicMenu.play()
+							if (ELEMENTS.audio.musicMenu && ELEMENTS.audio.musicMenu.tracks._1.paused) {
+								ELEMENTS.audio.musicMenu.tracks._1.play()
 							}
 						}
 				} catch (error) {console.log(error)}
@@ -1390,15 +1393,30 @@ window.addEventListener("load", function() {
 					// loop through all soundNames
 						for (var i in soundNames) {
 							// get file name
-								var soundName = soundNames[i]
+								var info = soundNames[i].split("_")
+								var soundName = info[0]
+								var loopDuration = info[1] && Number(info[1]) ? (Number(info[1]) / CONSTANTS.loopTime - 1) : null
+								var fadePerLoop = info[2] && Number(info[2]) ? (CONSTANTS.loopTime / Number(info[2])) : (CONSTANTS.loopTime / CONSTANTS.fadeTime)
+								var version = Number(info[3]) || 1
 
 							// create audio element that loops this file
 								var audioElement = new Audio()
-									audioElement.loop = true
-									audioElement.src = "/assets/" + soundName + ".mp3"
+									audioElement.loop = soundName.includes("music") ? true : false
+									audioElement.src = "/assets/" + soundNames[i] + ".mp3"
 
 							// add to list of audio objects
-								ELEMENTS.audio[soundName] = audioElement
+								if (!ELEMENTS.audio[soundName]) {
+									ELEMENTS.audio[soundName] = {
+										fadePerLoop: fadePerLoop,
+										loopDuration: loopDuration,
+										remainingLoops: 0,
+										activeTrack: null,
+										tracks: {}
+									}
+								}
+
+							// add to list of versions for that audio effect
+								ELEMENTS.audio[soundName].tracks["_" + version] = audioElement
 						}
 				} catch (error) {console.log(error)}
 			}
@@ -1412,9 +1430,9 @@ window.addEventListener("load", function() {
 						}
 
 					// play music
-						if (ELEMENTS.audio.musicGame && ELEMENTS.audio.musicGame.paused) {
-							ELEMENTS.audio.musicMenu.pause()
-							ELEMENTS.audio.musicGame.play()
+						if (ELEMENTS.audio.musicGame && ELEMENTS.audio.musicGame.tracks._1.paused) {
+							ELEMENTS.audio.musicMenu.tracks._1.pause()
+							ELEMENTS.audio.musicGame.tracks._1.play()
 						}
 
 					// not a player
@@ -1427,7 +1445,7 @@ window.addEventListener("load", function() {
 							// get current status (true / false)
 								var status = player.status.sfx[soundName]
 
-							// audio player not found
+							// audio object not found
 								if (!ELEMENTS.audio[soundName]) {
 									continue
 								}
@@ -1435,36 +1453,69 @@ window.addEventListener("load", function() {
 							// should be playing
 								if (status == true) {
 									// already playing --> keep playing (on a loop)
-										if (!ELEMENTS.audio[soundName].paused) {
-											continue
+										if (ELEMENTS.audio[soundName].activeTrack) {
+											// not time to switch tracks
+												if (ELEMENTS.audio[soundName].remainingLoops) {
+													ELEMENTS.audio[soundName].remainingLoops--
+													continue
+												}
+											
+											// infinite duration --> keep playing
+												if (!ELEMENTS.audio[soundName].loopDuration) {
+													continue
+												}
+
+											// multiple versions --> choose a random one
+												var previousTrackKey = ELEMENTS.audio[soundName].activeTrack
+												ELEMENTS.audio[soundName].tracks[previousTrackKey].volume = 0
+												ELEMENTS.audio[soundName].tracks[previousTrackKey].pause()
+
+												var trackKeys = Object.keys(ELEMENTS.audio[soundName].tracks)
+												var newTrackKey = trackKeys[Math.floor(Math.random() * trackKeys.length)]
+
+												ELEMENTS.audio[soundName].activeTrack = newTrackKey
+												ELEMENTS.audio[soundName].remainingLoops = ELEMENTS.audio[soundName].loopDuration
+												ELEMENTS.audio[soundName].tracks[newTrackKey].volume = 1
+												ELEMENTS.audio[soundName].tracks[newTrackKey].currentTime = 0
+												ELEMENTS.audio[soundName].tracks[newTrackKey].play()
+												continue
 										}
 
 									// start from beginning at full volume
-										ELEMENTS.audio[soundName].volume = 1
-										ELEMENTS.audio[soundName].currentTime = 0
-										ELEMENTS.audio[soundName].play()
-										continue
+										// random from versions
+											var trackKeys = Object.keys(ELEMENTS.audio[soundName].tracks)
+											var trackKey = trackKeys[Math.floor(Math.random() * trackKeys.length)]
+
+										// start
+											ELEMENTS.audio[soundName].activeTrack = trackKey
+											ELEMENTS.audio[soundName].remainingLoops = ELEMENTS.audio[soundName].loopDuration
+											ELEMENTS.audio[soundName].tracks[trackKey].volume = 1
+											ELEMENTS.audio[soundName].tracks[trackKey].currentTime = 0
+											ELEMENTS.audio[soundName].tracks[trackKey].play()
+											continue
 								}
 
 							// should not be playing
 								if (status == false) {
+									// get active track
+										var trackKey = ELEMENTS.audio[soundName].activeTrack
+
 									// already stopped
-										if (ELEMENTS.audio[soundName].paused) {
+										if (!trackKey) {
 											continue
 										}
 
 									// volume is 0 --> stop
-										if (ELEMENTS.audio[soundName].volume <= 0.1) {
-											ELEMENTS.audio[soundName].volume = 0
-											ELEMENTS.audio[soundName].pause()
+										if (ELEMENTS.audio[soundName].tracks[trackKey].volume <= ELEMENTS.audio[soundName].fadePerLoop) {
+											ELEMENTS.audio[soundName].tracks[trackKey].volume = 0
+											ELEMENTS.audio[soundName].tracks[trackKey].pause()
+											ELEMENTS.audio[soundName].activeTrack = null
 											continue
 										}
 
 									// still going --> decrease volume
-										if (ELEMENTS.audio[soundName].volume > 0.1) {
-											ELEMENTS.audio[soundName].volume -= 0.1
-											continue
-										}
+										ELEMENTS.audio[soundName].tracks[trackKey].volume -= ELEMENTS.audio[soundName].fadePerLoop
+										continue
 								}
 						}
 				} catch (error) {console.log(error)}

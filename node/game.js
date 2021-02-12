@@ -1408,6 +1408,11 @@
 					player.status.velocity.x = Math.round(player.status.velocity.x * maximumAdjustment * CONSTANTS.rounding) / CONSTANTS.rounding
 					player.status.velocity.y = Math.round(player.status.velocity.y * maximumAdjustment * CONSTANTS.rounding) / CONSTANTS.rounding
 					player.status.velocity.a = Math.round(Math.sign(player.status.velocity.a) * Math.min(player.options.maximumAngularVelocity, Math.abs(player.status.velocity.a)) * CONSTANTS.rounding) / CONSTANTS.rounding
+
+				// moving
+					if (player.status.velocity.x || player.status.velocity.y) {
+						player.status.sfx.moving = true
+					}
 			}
 			catch (error) {
 				CORE.logError(error)
@@ -1741,7 +1746,7 @@
 								// game mode: capture_the_hat
 									if (game.status.mode == "capture_the_hat") {
 										if (player.status.isIt && !player.status.energy) {
-											player.status.sfx.noEnergy = true
+											player.status.sfx.dropOrb = true
 
 											player.status.isIt = false
 											player.status.cooldowns.invincibility = player.options.invincibilityCooldown
@@ -1760,7 +1765,7 @@
 											})
 										}
 										else if (thatPlayer.status.isIt && !thatPlayer.status.energy) {
-											thatPlayer.status.sfx.noEnergy = true
+											thatPlayer.status.sfx.dropOrb = true
 
 											thatPlayer.status.isIt = false
 											thatPlayer.status.cooldowns.invincibility = thatPlayer.options.invincibilityCooldown
@@ -2139,6 +2144,8 @@
 
 										// opponent
 											if (!thatPlayer.status.cooldowns.invincibility) {
+												player.status.sfx.laserHitting = true
+
 												thatPlayer.status.sfx.collisionOpponentLaser = true
 												thatPlayer.status.energy = Math.max(thatPlayer.options.minimumEnergyFromDamage, Math.min(thatPlayer.options.maximumEnergy, thatPlayer.status.energy - player.options.laserAttackMultiplier * player.laser[player.laser.length - 1].e))
 
@@ -2172,7 +2179,7 @@
 												// game mode: capture_the_hat
 													if (game.status.mode == "capture_the_hat") {
 														if (thatPlayer.status.isIt && !thatPlayer.status.energy) {
-															thatPlayer.status.sfx.noEnergy = true
+															thatPlayer.status.sfx.dropOrb = true
 
 															thatPlayer.status.isIt = false
 															thatPlayer.status.cooldowns.invincibility = thatPlayer.options.invincibilityCooldown

@@ -258,7 +258,10 @@
 										collisionObstacle: false,
 										collisionTeleporter: false,
 										collisionOrb: false,
+										dropOrb: false,
+										moving: false,
 										shootingLaser: false,
+										laserHitting: false,
 										noEnergy: false
 									}
 								},
@@ -293,7 +296,7 @@
 									minimumEnergyFromDamage: 0,
 									laserEnergy: [0, 3, 4, 5],
 									laserDissipation: [1, 0.5, 0.25, 0],
-									laserAttackModifier: 3,
+									laserAttackMultiplier: 3,
 									visionTopToBottom: 3,
 									visionRightToLeft: 1,
 									visionZoom: 1,
@@ -541,17 +544,28 @@
 
 						case "audio":
 							return [
+								// soundName_msUntilChange_msToFadeOut_version
 								"musicMenu",
 								"musicGame",
-								"collisionOpponentLaser",
 								"collisionAllyLaser",
-								"collisionPlayer",
-								"collisionWall",
 								"collisionObstacle",
-								"collisionTeleporter",
+								"collisionOpponentLaser",
 								"collisionOrb",
-								"shootingLaser",
-								"noEnergy"
+								"collisionPlayer",
+								"collisionTeleporter",
+								"collisionWall",
+								"dropOrb",
+								"laserHitting_500_0_1",
+								"laserHitting_500_0_2",
+								"laserHitting_500_0_3",
+								"laserHitting_500_0_4",
+								"moving_1000_0_1",
+								"moving_1000_0_2",
+								"moving_1000_0_3",
+								"moving_1000_0_4",
+								"noEnergy",
+								"shootingLaser_0_100_1",
+								"shootingLaser_0_100_2",
 							]
 						break
 
