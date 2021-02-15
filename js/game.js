@@ -76,6 +76,7 @@ window.addEventListener("load", function() {
 				},
 				audio: {}
 			}
+			window.ELEMENTS = ELEMENTS // ???
 
 		/* constants */
 			var CONSTANTS = {
@@ -88,6 +89,7 @@ window.addEventListener("load", function() {
 				reflectionWedgeWidth: 2,
 				maximumReflections: 4,
 				observerZoom: 0.2,
+				audioVolume: 0.6
 			}
 
 		/* game */
@@ -1397,12 +1399,14 @@ window.addEventListener("load", function() {
 								var soundName = info[0]
 								var loopDuration = info[1] && Number(info[1]) ? (Number(info[1]) / CONSTANTS.loopTime - 1) : null
 								var fadePerLoop = info[2] && Number(info[2]) ? (CONSTANTS.loopTime / Number(info[2])) : (CONSTANTS.loopTime / CONSTANTS.fadeTime)
+									fadePerLoop = fadePerLoop * CONSTANTS.audioVolume
 								var version = Number(info[3]) || 1
 
 							// create audio element that loops this file
 								var audioElement = new Audio()
 									audioElement.loop = soundName.includes("music") ? true : false
 									audioElement.src = "/assets/" + soundNames[i] + ".mp3"
+									audioElement.volume = CONSTANTS.audioVolume
 
 							// add to list of audio objects
 								if (!ELEMENTS.audio[soundName]) {
@@ -1475,7 +1479,7 @@ window.addEventListener("load", function() {
 
 												ELEMENTS.audio[soundName].activeTrack = newTrackKey
 												ELEMENTS.audio[soundName].remainingLoops = ELEMENTS.audio[soundName].loopDuration
-												ELEMENTS.audio[soundName].tracks[newTrackKey].volume = 1
+												ELEMENTS.audio[soundName].tracks[newTrackKey].volume = CONSTANTS.audioVolume
 												ELEMENTS.audio[soundName].tracks[newTrackKey].currentTime = 0
 												ELEMENTS.audio[soundName].tracks[newTrackKey].play()
 												continue
@@ -1489,7 +1493,7 @@ window.addEventListener("load", function() {
 										// start
 											ELEMENTS.audio[soundName].activeTrack = trackKey
 											ELEMENTS.audio[soundName].remainingLoops = ELEMENTS.audio[soundName].loopDuration
-											ELEMENTS.audio[soundName].tracks[trackKey].volume = 1
+											ELEMENTS.audio[soundName].tracks[trackKey].volume = CONSTANTS.audioVolume
 											ELEMENTS.audio[soundName].tracks[trackKey].currentTime = 0
 											ELEMENTS.audio[soundName].tracks[trackKey].play()
 											continue

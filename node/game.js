@@ -381,7 +381,6 @@
 								}
 								if (total > CONSTANTS.maximumTotalStatisticValue) {
 									player.setup[REQUEST.post.field] = beforeValue
-									callback({gameId: gameId, success: false, message: "statistic total cannot exceed " + CONSTANTS.maximumTotalStatisticValue, recipients: [REQUEST.session.id]})
 									return
 								}
 							}
