@@ -262,7 +262,8 @@
 										moving: false,
 										shootingLaser: false,
 										laserHitting: false,
-										noEnergy: false
+										noEnergy: false,
+										taggedIt: false
 									}
 								},
 								keys: {
@@ -547,25 +548,26 @@
 								// soundName_msUntilChange_msToFadeOut_version
 								"musicMenu",
 								"musicGame",
-								"collisionAllyLaser",
+								"collisionAllyLaser_1000_0_1",
 								"collisionObstacle",
-								"collisionOpponentLaser",
+								"collisionOpponentLaser_1000_0_1",
 								"collisionOrb",
 								"collisionPlayer",
 								"collisionTeleporter",
 								"collisionWall",
 								"dropOrb",
-								"laserHitting_500_0_1",
-								"laserHitting_500_0_2",
-								"laserHitting_500_0_3",
-								"laserHitting_500_0_4",
-								"moving_1000_0_1",
-								"moving_1000_0_2",
-								"moving_1000_0_3",
-								"moving_1000_0_4",
+								"laserHitting_160_0_1",
+								"laserHitting_160_0_2",
+								"laserHitting_160_0_3",
+								"laserHitting_160_0_4",
+								"moving_400_0_1",
+								"moving_400_0_2",
+								"moving_400_0_3",
+								"moving_400_0_4",
 								"noEnergy",
 								"shootingLaser_0_100_1",
 								"shootingLaser_0_100_2",
+								"taggedIt"
 							]
 						break
 

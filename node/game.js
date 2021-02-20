@@ -1696,10 +1696,18 @@
 										thatPlayer.status.energy = Math.max(thatPlayer.options.minimumEnergyFromDamage, Math.min(thatPlayer.options.maximumEnergy, thatPlayer.status.energy - tempSpeed * player.options.bump))
 									}
 
+								// no energy?
+									if (!thatPlayer.status.energy) {
+										thatPlayer.status.sfx.noEnergy = true
+									}
+									if (!player.status.energy) {
+										player.status.sfx.noEnergy = true
+									}
+
 								// game mode: classic_tag
 									if (game.status.mode == "classic_tag") {
 										if (player.status.isIt && !thatPlayer.status.energy) {
-											thatPlayer.status.sfx.noEnergy = true
+											thatPlayer.status.sfx.taggedIt = true
 
 											thatPlayer.status.isIt = true
 											thatPlayer.options.minimumEnergyFromDamage = player.options.minimumEnergyFromDamage
@@ -1712,7 +1720,7 @@
 											game.status.messageTimeRemaining = CONSTANTS.messageDuration
 										}
 										else if (thatPlayer.status.isIt && !player.status.energy) {
-											player.status.sfx.noEnergy = true
+											player.status.sfx.taggedIt = true
 
 											player.status.isIt = true
 											player.options.minimumEnergyFromDamage = thatPlayer.options.minimumEnergyFromDamage
@@ -1729,14 +1737,10 @@
 								// game mode: team_freeze_tag
 									if (game.status.mode == "team_freeze_tag") {
 										if (!thatPlayer.status.energy) {
-											thatPlayer.status.sfx.noEnergy = true
-
 											game.status.message = thatPlayer.name + " IS FROZEN"
 											game.status.messageTimeRemaining = CONSTANTS.messageDuration
 										}
 										else if (!player.status.energy) {
-											player.status.sfx.noEnergy = true
-
 											game.status.message = player.name + " IS FROZEN"
 											game.status.messageTimeRemaining = CONSTANTS.messageDuration
 										}
@@ -1795,8 +1799,6 @@
 											thatPlayer.status.energy = thatPlayer.options.maximumEnergy
 											thatPlayer.status.cooldowns.invincibility = player.options.invincibilityCooldown
 
-											thatPlayer.status.sfx.noEnergy = true
-
 											game.status.message = player.name + " ZAPS " + thatPlayer.name
 											game.status.messageTimeRemaining = CONSTANTS.messageDuration
 										}
@@ -1808,8 +1810,6 @@
 											player.status.position.y = teamSpawner ? teamSpawner.position.y : (game.map.options.cells.y / 2 * game.map.options.cellsize)
 											player.status.energy = thatPlayer.options.maximumEnergy
 											player.status.cooldowns.invincibility = player.options.invincibilityCooldown
-
-											player.status.sfx.noEnergy = true
 
 											game.status.message = thatPlayer.name + " ZAPS " + player.name
 											game.status.messageTimeRemaining = CONSTANTS.messageDuration
@@ -2148,10 +2148,15 @@
 												thatPlayer.status.sfx.collisionOpponentLaser = true
 												thatPlayer.status.energy = Math.max(thatPlayer.options.minimumEnergyFromDamage, Math.min(thatPlayer.options.maximumEnergy, thatPlayer.status.energy - player.options.laserAttackMultiplier * player.laser[player.laser.length - 1].e))
 
+												// no energy?
+													if (!thatPlayer.status.energy) {
+														thatPlayer.status.sfx.noEnergy = true
+													}
+
 												// game mode: classic_tag
 													if (game.status.mode == "classic_tag") {
 														if (player.status.isIt && !thatPlayer.status.energy) {
-															thatPlayer.status.sfx.noEnergy = true
+															thatPlayer.status.sfx.taggedIt = true
 
 															thatPlayer.status.isIt = true
 															thatPlayer.options.minimumEnergyFromDamage = player.options.minimumEnergyFromDamage
@@ -2168,8 +2173,6 @@
 												// game mode: team_freeze_tag
 													if (game.status.mode == "team_freeze_tag") {
 														if (!thatPlayer.status.energy) {
-															thatPlayer.status.sfx.noEnergy = true
-
 															game.status.message = thatPlayer.name + " IS FROZEN"
 															game.status.messageTimeRemaining = CONSTANTS.messageDuration
 														}
@@ -2208,8 +2211,6 @@
 															thatPlayer.status.position.y = teamSpawner ? teamSpawner.position.y : (game.map.options.cells.y / 2 * game.map.options.cellsize)
 															thatPlayer.status.energy = thatPlayer.options.maximumEnergy
 															thatPlayer.status.cooldowns.invincibility = player.options.invincibilityCooldown
-
-															thatPlayer.status.sfx.noEnergy = true
 
 															game.status.message = player.name + " ZAPS " + thatPlayer.name
 															game.status.messageTimeRemaining = CONSTANTS.messageDuration
