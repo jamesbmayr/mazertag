@@ -1436,7 +1436,7 @@ window.addEventListener("load", function() {
 					// play music
 						if (ELEMENTS.audio.musicGame && ELEMENTS.audio.musicGame.tracks._1.paused) {
 							ELEMENTS.audio.musicMenu.tracks._1.pause()
-							ELEMENTS.audio.musicGame.tracks._1.play()
+							// ELEMENTS.audio.musicGame.tracks._1.play() // ??? no game music yet
 						}
 
 					// not a player
