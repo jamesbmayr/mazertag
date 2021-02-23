@@ -296,8 +296,9 @@
 									minimumEnergyForLaser: 25,
 									minimumEnergyFromDamage: 0,
 									laserEnergy: [0, 3, 4, 5],
+									laserUseEnergy: 3,
 									laserDissipation: [1, 0.5, 0.25, 0],
-									laserAttackMultiplier: 3,
+									laserAttackMultiplier: 2,
 									visionTopToBottom: 3,
 									visionRightToLeft: 1,
 									visionZoom: 1,
@@ -338,11 +339,25 @@
 										special: colors["dark-gray"],
 										cellsize: 100,
 										text: {
-											fontSize: 50,
+											fontSize: 25,
 											color: colors["light-gray"],
 											opacity: 0.5,
 											xOffset: 0.5,
-											yOffset: 0.75
+											yOffset: 0.95
+										},
+										time: {
+											fontSize: 25,
+											color: colors["light-gray"],
+											opacity: 0.5,
+											xOffset: 0.1,
+											yOffset: 0.95
+										},
+										score: {
+											fontSize: 25,
+											color: colors["light-gray"],
+											opacity: 0.5,
+											xOffset: 0.9,
+											yOffset: 0.95
 										},
 										rooms: {
 											x: 0,
@@ -1372,11 +1387,11 @@
 							var constants = getAsset("constants")
 							return {
 								mode: [
-									{value: "classic_tag", name: "classic tag"},
-									{value: "team_freeze_tag", name: "team freeze tag"},
-									{value: "capture_the_hat", name: "capture the hat"},
-									{value: "team_battle", name: "team battle"},
-									{value: "collect_the_orbs", name: "collect the orbs"}
+									{value: "classic_tag", name: "classic tag", description: "If you're \"it\", bump or zap someone to make them \"it\". Whoever's \"it\" when time runs out loses."},
+									{value: "team_freeze_tag", name: "team freeze tag", description: "Zap opponents to freeze them in place. Zap allies to unfreeze them. Win by freezing all other teams."},
+									{value: "capture_the_hat", name: "capture the hat", description: "Find the hat - or whoever has it. Then run into the shadows and hold it until time runs out."},
+									{value: "team_battle", name: "team battle", description: "Zap someone down to 0 to get a point for your team. The team with the most points wins."},
+									{value: "collect_the_orbs", name: "collect the orbs", description: "Zap or run into orbs to earn a point for your team. The team with the most points wins."}
 								],
 								time: [
 									{value: String(constants.minute * 1), name: "short (1 minute)"},
@@ -1388,8 +1403,7 @@
 									{value: "1,1", name: "tiny (1x1)"},
 									{value: "2,2", name: "small (2x2)"},
 									{value: "3,2", name: "medium (3x2)"},
-									{value: "3,3", name: "large (3x3)"},
-									{value: "4,3", name: "huge (4x3)"}
+									{value: "3,3", name: "large (3x3)"}
 								],
 								windows: [
 									{value: "0", name: "none (0)"},

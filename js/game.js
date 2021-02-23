@@ -47,6 +47,7 @@ window.addEventListener("load", function() {
 				setup: {
 					element: document.querySelector("#setup"),
 					launch: document.querySelector("#setup-launch"),
+					descriptions: document.querySelector("#setup-descriptions"),
 					game: {
 						mode: document.querySelector("#setup-game-mode"),
 						time: document.querySelector("#setup-game-time"),
@@ -80,6 +81,7 @@ window.addEventListener("load", function() {
 
 		/* constants */
 			var CONSTANTS = {
+				second: 1000,
 				circleRadians: Math.PI * 2,
 				circleDegrees: 360,
 				radiansConversion: Math.PI / 180,
@@ -320,6 +322,14 @@ window.addEventListener("load", function() {
 						for (var i in ELEMENTS.setup.game) {
 							if (ELEMENTS.setup.game[i] !== document.activeElement) {
 								ELEMENTS.setup.game[i].value = game.setup[i]
+
+								if (i == "mode") {
+									ELEMENTS.setup.descriptions.querySelectorAll(".setup-description").forEach(function(element) {
+										element.setAttribute("visibility", false)
+									})
+									
+									ELEMENTS.setup.descriptions.querySelector("#setup-description-" + game.setup[i]).setAttribute("visibility", true)
+								}
 							}
 						}
 
@@ -405,7 +415,7 @@ window.addEventListener("load", function() {
 							teamSelect.className = "setup-select"
 							teamSelect.id = "setup-player-" + player.id + "-team"
 							if (player.id !== PLAYERID) { teamSelect.setAttribute("readonly", true) }
-							else { teamSelect.addEventListener("change", updateOption) }
+							else { teamSelect.addEventListener("input", updateOption) }
 						teamLabel.appendChild(teamSelect)
 						ELEMENTS.setup.players[player.id].team = teamSelect
 
@@ -417,6 +427,16 @@ window.addEventListener("load", function() {
 						}
 
 					// stats
+						var notches = document.createElement("div")
+							notches.className = "setup-player-notches"
+						playerElement.appendChild(notches)
+
+						for (var i = 0; i < 9; i++) {
+							var notch = document.createElement("div")
+								notch.className = "setup-player-notch"
+							notches.appendChild(notch)
+						}
+
 						var bar = document.createElement("div")
 							bar.className = "setup-player-bar"
 							bar.setAttribute("statistics", "")
@@ -559,7 +579,7 @@ window.addEventListener("load", function() {
 			}
 
 		/* updateOption */
-			for (var i in ELEMENTS.setup.game) { ELEMENTS.setup.game[i].addEventListener("change", updateOption) }
+			for (var i in ELEMENTS.setup.game) { ELEMENTS.setup.game[i].addEventListener("input", updateOption) }
 			function updateOption(event) {
 				try {
 					// set interacted
@@ -588,6 +608,7 @@ window.addEventListener("load", function() {
 
 					// send update
 						SOCKET.send(JSON.stringify({action: "updateOption", playerId: PLAYERID, gameId: GAME.id, section: section, field: field, value: value}))
+						event.target.blur()
 				} catch (error) {console.log(error)}
 			}
 
@@ -647,10 +668,10 @@ window.addEventListener("load", function() {
 						if ((event.key && (event.key == " " || event.code == "Space")) || (mobileControls && mobileControls.includes("space"))) {
 							SOCKET.send(JSON.stringify({action: "pressKey", playerId: PLAYERID, gameId: GAME.id, key: "space"}))
 						}
-						if ((event.key && (event.key == "[" || event.code == "BracketLeft" || event.key == "," || event.code == "Comma")) || (mobileControls && mobileControls.includes("ccw"))) {
+						if ((event.key && (event.key == "[" || event.code == "BracketLeft" || event.key == "," || event.code == "Comma" || event.key.toLowerCase() == "z")) || (mobileControls && mobileControls.includes("ccw"))) {
 							SOCKET.send(JSON.stringify({action: "pressKey", playerId: PLAYERID, gameId: GAME.id, key: "ccw"}))
 						}
-						if ((event.key && (event.key == "]" || event.code == "BracketRight" || event.key == "." || event.code == "Period")) || (mobileControls && mobileControls.includes("cw"))) {
+						if ((event.key && (event.key == "]" || event.code == "BracketRight" || event.key == "." || event.code == "Period" || event.key.toLowerCase() == "x")) || (mobileControls && mobileControls.includes("cw"))) {
 							SOCKET.send(JSON.stringify({action: "pressKey", playerId: PLAYERID, gameId: GAME.id, key: "cw"}))
 						}
 				} catch (error) {console.log(error)}
@@ -695,10 +716,10 @@ window.addEventListener("load", function() {
 						if ((event.key && (event.key == " " || event.code == "Space")) || (mobileControls && mobileControls.includes("space"))) {
 							SOCKET.send(JSON.stringify({action: "liftKey", playerId: PLAYERID, gameId: GAME.id, key: "space"}))
 						}
-						if ((event.key && (event.key == "[" || event.code == "BracketLeft" || event.key == "," || event.code == "Comma")) || (mobileControls && mobileControls.includes("ccw"))) {
+						if ((event.key && (event.key == "[" || event.code == "BracketLeft" || event.key == "," || event.code == "Comma" || event.key.toLowerCase() == "z")) || (mobileControls && mobileControls.includes("ccw"))) {
 							SOCKET.send(JSON.stringify({action: "liftKey", playerId: PLAYERID, gameId: GAME.id, key: "ccw"}))
 						}
-						if ((event.key && (event.key == "]" || event.code == "BracketRight" || event.key == "." || event.code == "Period")) || (mobileControls && mobileControls.includes("cw"))) {
+						if ((event.key && (event.key == "]" || event.code == "BracketRight" || event.key == "." || event.code == "Period" || event.key.toLowerCase() == "x")) || (mobileControls && mobileControls.includes("cw"))) {
 							SOCKET.send(JSON.stringify({action: "liftKey", playerId: PLAYERID, gameId: GAME.id, key: "cw"}))
 						}
 				} catch (error) {console.log(error)}
@@ -1198,6 +1219,100 @@ window.addEventListener("load", function() {
 								fontSize: game.map.options.text.fontSize
 							})
 						}
+
+					// game over?
+						if (game.status.timeRemaining <= 0) {
+							return
+						}
+
+					// timer
+						drawText(canvas, context, {
+							x: canvas.width * game.map.options.time.xOffset,
+							y: canvas.height * game.map.options.time.yOffset,
+							text: Math.floor(game.status.timeRemaining / CONSTANTS.second),
+							color: game.map.options.time.color,
+							opacity: game.map.options.time.opacity,
+							fontSize: game.map.options.time.fontSize
+						})
+
+					// score
+						// game mode: classic_tag
+							if (game.status.mode == "classic_tag") {
+								drawText(canvas, context, {
+									x: canvas.width * game.map.options.score.xOffset,
+									y: canvas.height * game.map.options.score.yOffset,
+									text: game.status.it ? game.players[game.status.it].name : "?",
+									color: game.map.options.score.color,
+									opacity: game.map.options.score.opacity,
+									fontSize: game.map.options.score.fontSize
+								})
+							}
+
+						// game mode: team_freeze_tag
+							if (game.status.mode == "team_freeze_tag") {
+								var offset = game.map.options.score.yOffset
+								for (var i in game.status.frozen) {
+									if (game.status.frozen[i]) {
+										drawText(canvas, context, {
+											x: canvas.width * game.map.options.score.xOffset,
+											y: canvas.height * offset,
+											text: i.toUpperCase() + ": " + game.status.frozen[i],
+											color: game.map.options.score.color,
+											opacity: game.map.options.score.opacity,
+											fontSize: game.map.options.score.fontSize
+										})
+										offset -= (1 - game.map.options.score.yOffset)
+									}
+								}
+							}
+
+						// game mode: capture_the_hat
+							if (game.status.mode == "capture_the_hat") {
+								drawText(canvas, context, {
+									x: canvas.width * game.map.options.score.xOffset,
+									y: canvas.height * game.map.options.score.yOffset,
+									text: game.status.it ? game.players[game.status.it].name : "?",
+									color: game.map.options.score.color,
+									opacity: game.map.options.score.opacity,
+									fontSize: game.map.options.score.fontSize
+								})
+							}
+
+						// game mode: team_battle
+							if (game.status.mode == "team_battle") {
+								var offset = game.map.options.score.yOffset
+								for (var i in game.status.kills) {
+									if (game.status.kills[i]) {
+										drawText(canvas, context, {
+											x: canvas.width * game.map.options.score.xOffset,
+											y: canvas.height * offset,
+											text: i.toUpperCase() + ": " + game.status.kills[i],
+											color: game.map.options.score.color,
+											opacity: game.map.options.score.opacity,
+											fontSize: game.map.options.score.fontSize
+										})
+										offset -= (1 - game.map.options.score.yOffset)
+									}
+								}
+							}
+
+						// game mode: collect_the_orbs
+							if (game.status.mode == "collect_the_orbs") {
+								var offset = game.map.options.score.yOffset
+								for (var i in game.status.orbs) {
+									if (game.status.orbs[i]) {
+										drawText(canvas, context, {
+											x: canvas.width * game.map.options.score.xOffset,
+											y: canvas.height * offset,
+											text: i.toUpperCase() + ": " + game.status.orbs[i],
+											color: game.map.options.score.color,
+											opacity: game.map.options.score.opacity,
+											fontSize: game.map.options.score.fontSize
+										})
+										offset -= (1 - game.map.options.score.yOffset)
+									}
+								}
+							}
 				} catch (error) {console.log(error)}
 			}
 
@@ -1380,7 +1495,7 @@ window.addEventListener("load", function() {
 									x: player.status.position.x,
 									y: player.status.position.y,
 									text: player.name,
-									color: mapOptions.shadow.color,
+									color: player.status.isIt ? mapOptions.text.color : mapOptions.shadow.color,
 									fontSize: player.options.fontSize * mapOptions.cellsize / 100,
 									opacity: player.options.textOpacity
 								})

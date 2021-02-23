@@ -488,8 +488,17 @@
 						// 1 player is It
 						// that player cannot be killed
 						var itKey = CORE.chooseRandom(Object.keys(game.players))
+						game.status.it = itKey
 						game.players[itKey].status.isIt = true
 						game.players[itKey].options.minimumEnergyFromDamage = game.players[itKey].options.minimumEnergyForLaser
+					}
+
+				// game mode: team_freeze_tag
+					if (game.status.mode == "team_freeze_tag") {
+						game.status.frozen = {}
+						for (var i in CONSTANTS.teams) {
+							game.status.frozen[CONSTANTS.teams[i]] = 0
+						}
 					}
 
 				// game mode: capture_the_hat
@@ -505,6 +514,7 @@
 								y: Number(cell.split(",")[1]) * game.map.options.cellsize
 							}
 						})
+						game.status.it = null
 					}
 
 				// game mode: team_battle
@@ -1319,13 +1329,6 @@
 						game.status.messageTimeRemaining = CONSTANTS.messageDuration
 						return
 					}
-
-				// 10-second countdown
-					if (game.status.timeRemaining <= CONSTANTS.second * 10) {
-						game.status.message = String(Math.ceil(game.status.timeRemaining / CONSTANTS.second))
-						game.status.messageTimeRemaining = CONSTANTS.messageDuration
-						return
-					}
 			}
 			catch (error) {
 				CORE.logError(error)
@@ -1533,9 +1536,6 @@
 					if (collision) {
 						player.status.sfx.collisionWall = true
 						var speed = getTriangleSide(player.status.velocity.x, player.status.velocity.y, null)
-						if (player.status.energy >= player.options.minimumEnergyForLaser) {
-							player.status.energy = Math.max(player.options.minimumEnergyForLaser, Math.min(player.options.maximumEnergy, player.status.energy - Math.round(speed / 2)))
-						}
 					}
 
 				// item collisions
@@ -1581,6 +1581,8 @@
 										player.status.sfx.collisionOrb = true
 
 										player.status.isIt = true
+
+										game.status.it = player.id
 										game.status.message = player.name + " CAPTURES THE HAT"
 										game.status.messageTimeRemaining = CONSTANTS.messageDuration
 
@@ -1681,7 +1683,7 @@
 									player.status.position.y += overlap.d * sinOverlapA
 									player.status.velocity.x = thatPlayer.status.velocity.x * thatPlayer.options.bump
 									player.status.velocity.y = thatPlayer.status.velocity.y * thatPlayer.options.bump
-									if (!player.status.cooldowns.invincibility) {
+									if (!player.status.cooldowns.invincibility && player.status.team !== thatPlayer.status.team) {
 										player.status.energy = Math.max(player.options.minimumEnergyFromDamage, Math.min(player.options.maximumEnergy, player.status.energy - getTriangleSide(thatPlayer.status.velocity.x, thatPlayer.status.velocity.y, null) * thatPlayer.options.bump))
 									}
 
@@ -1692,7 +1694,7 @@
 									thatPlayer.status.position.y -= overlap.d * sinOverlapA
 									thatPlayer.status.velocity.x = tempVX * player.options.bump
 									thatPlayer.status.velocity.y = tempVY * player.options.bump
-									if (!thatPlayer.status.cooldowns.invincibility) {
+									if (!thatPlayer.status.cooldowns.invincibility && player.status.team !== thatPlayer.status.team) {
 										thatPlayer.status.energy = Math.max(thatPlayer.options.minimumEnergyFromDamage, Math.min(thatPlayer.options.maximumEnergy, thatPlayer.status.energy - tempSpeed * player.options.bump))
 									}
 
@@ -1716,6 +1718,7 @@
 											player.options.minimumEnergyFromDamage = 0
 											player.status.cooldowns.invincibility = player.options.invincibilityCooldown
 
+											game.status.it = thatPlayer.id
 											game.status.message = thatPlayer.name + " IS IT"
 											game.status.messageTimeRemaining = CONSTANTS.messageDuration
 										}
@@ -1729,6 +1732,7 @@
 											thatPlayer.options.minimumEnergyFromDamage = 0
 											thatPlayer.status.cooldowns.invincibility = player.options.invincibilityCooldown
 
+											game.status.it = player.id
 											game.status.message = player.name + " IS IT"
 											game.status.messageTimeRemaining = CONSTANTS.messageDuration
 										}
@@ -1736,14 +1740,35 @@
 
 								// game mode: team_freeze_tag
 									if (game.status.mode == "team_freeze_tag") {
-										if (!thatPlayer.status.energy) {
-											game.status.message = thatPlayer.name + " IS FROZEN"
-											game.status.messageTimeRemaining = CONSTANTS.messageDuration
-										}
-										else if (!player.status.energy) {
-											game.status.message = player.name + " IS FROZEN"
-											game.status.messageTimeRemaining = CONSTANTS.messageDuration
-										}
+										// opposite teams
+											if (player.status.team !== thatPlayer.status.team) {
+												if (!thatPlayer.status.energy) {
+													game.status.frozen[thatPlayer.status.team]++
+													game.status.message = thatPlayer.name + " IS FROZEN"
+													game.status.messageTimeRemaining = CONSTANTS.messageDuration
+												}
+												else if (!player.status.energy) {
+													game.status.frozen[player.status.team]++
+													game.status.message = player.name + " IS FROZEN"
+													game.status.messageTimeRemaining = CONSTANTS.messageDuration
+												}
+											}
+
+										// same team
+											else if (player.status.team == thatPlayer.status.team) {
+												if (!thatPlayer.status.energy) {
+													thatPlayer.status.energy = thatPlayer.options.minimumEnergyForLaser
+													game.status.frozen[thatPlayer.status.team]--
+													game.status.message = thatPlayer.name + " IS UNFROZEN"
+													game.status.messageTimeRemaining = CONSTANTS.messageDuration
+												}
+												else if (!player.status.energy) {
+													player.status.energy = player.options.minimumEnergyForLaser
+													game.status.frozen[player.status.team]--
+													game.status.message = player.name + " IS UNFROZEN"
+													game.status.messageTimeRemaining = CONSTANTS.messageDuration
+												}
+											}
 									}
 
 								// game mode: capture_the_hat
@@ -1754,6 +1779,7 @@
 											player.status.isIt = false
 											player.status.cooldowns.invincibility = player.options.invincibilityCooldown
 
+											game.status.it = null
 											game.status.message = player.name + " DROPS THE HAT"
 											game.status.messageTimeRemaining = CONSTANTS.messageDuration
 
@@ -1994,7 +2020,7 @@
 
 				// decrease energy
 					player.status.sfx.shootingLaser = true
-					player.status.energy -= player.options.laserEnergy
+					player.status.energy -= player.options.laserUseEnergy
 
 				// starting angles
 					var currentAngle = (player.status.position.a + CONSTANTS.circleDegrees / 4) % CONSTANTS.circleDegrees // 90 degree shift so it's always facing forward
@@ -2136,6 +2162,13 @@
 
 										// ally
 											if (thatPlayer.status.team == player.status.team && !thatPlayer.status.isIt && !player.status.isIt) {
+												// game mode: team_freeze_tag
+													if (game.status.mode == "team_freeze_tag" && !thatPlayer.status.energy) {
+														game.status.frozen[thatPlayer.status.team]--
+														game.status.message = thatPlayer.name + " IS UNFROZEN"
+														game.status.messageTimeRemaining = CONSTANTS.messageDuration
+													}
+
 												thatPlayer.status.sfx.collisionAllyLaser = true
 												thatPlayer.status.energy = Math.max(thatPlayer.options.minimumEnergyFromDamage, Math.min(thatPlayer.options.maximumEnergy, thatPlayer.status.energy + player.laser[player.laser.length - 1].e))
 												break
@@ -2165,6 +2198,7 @@
 															player.options.minimumEnergyFromDamage = 0
 															player.status.cooldowns.invincibility = player.options.invincibilityCooldown
 
+															game.status.it = thatPlayer.id
 															game.status.message = thatPlayer.name + " IS IT"
 															game.status.messageTimeRemaining = CONSTANTS.messageDuration
 														}
@@ -2173,6 +2207,7 @@
 												// game mode: team_freeze_tag
 													if (game.status.mode == "team_freeze_tag") {
 														if (!thatPlayer.status.energy) {
+															game.status.frozen[thatPlayer.status.team]++
 															game.status.message = thatPlayer.name + " IS FROZEN"
 															game.status.messageTimeRemaining = CONSTANTS.messageDuration
 														}
@@ -2186,6 +2221,7 @@
 															thatPlayer.status.isIt = false
 															thatPlayer.status.cooldowns.invincibility = thatPlayer.options.invincibilityCooldown
 
+															game.status.it = null
 															game.status.message = thatPlayer.name + " DROPS THE HAT"
 															game.status.messageTimeRemaining = CONSTANTS.messageDuration
 

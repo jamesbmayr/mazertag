@@ -26,11 +26,14 @@
 						<span>mode</span>
 						<select id="setup-game-mode" class="setup-select"><script node>
 							var options = ""
+							var descriptions = ""
 							for (var i in mapSetup.mode) {
 								options += '<option value="' + mapSetup.mode[i].value + '">' + mapSetup.mode[i].name + '</option>'
+								descriptions += '<div class="setup-description" id="setup-description-' + mapSetup.mode[i].value + '">' + mapSetup.mode[i].description + '</div>'
 							}
 							options
 						</script>node></select>
+						<div id="setup-descriptions"><script node>descriptions</script>node></div>
 					</label>
 					<label class="setup-row">
 						<span>time</span>
@@ -41,6 +44,7 @@
 							}
 							options
 						</script>node></select>
+						<div class="setup-description">How long should the match last?</div>
 					</label>
 					<label class="setup-row">
 						<span>size</span>
@@ -51,6 +55,7 @@
 							}
 							options
 						</script>node></select>
+						<div class="setup-description">How many rooms in this arena?</div>
 					</label>
 					<label class="setup-row">
 						<span>windows</span>
@@ -61,6 +66,7 @@
 							}
 							options
 						</script>node></select>
+						<div class="setup-description">Lasers can pass through these light-blue cells, but players cannot.</div>
 					</label>
 					<label class="setup-row">
 						<span>mirrors</span>
@@ -71,6 +77,7 @@
 							}
 							options
 						</script>node></select>
+						<div class="setup-description">Use these silver cells to bounce lasers and see around corners.</div>
 					</label>
 					<label class="setup-row">
 						<span>teleporters</span>
@@ -81,6 +88,7 @@
 							}
 							options
 						</script>node></select>
+						<div class="setup-description">Step into an orange teleporter to instantly "jump" to another one.</div>
 					</label>
 					<label class="setup-row">
 						<span>obstacles</span>
@@ -91,6 +99,7 @@
 							}
 							options
 						</script>node></select>
+						<div class="setup-description">These big purple blocks can be pushed around to block players and lasers.</div>
 					</label>
 				</div>
 				<div id="setup-controls" class="setup-section">
@@ -101,7 +110,7 @@
 					</label>
 					<label class="setup-row">
 						<span>rotation</span>
-						<b>[</b><b>]</b> | <b>,</b><b>.</b>
+						<b>Z</b><b>X</b> | <b>[</b><b>]</b> | <b>,</b><b>.</b>
 					</label>
 					<label class="setup-row">
 						<span>laser</span>

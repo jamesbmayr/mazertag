@@ -81,8 +81,8 @@
 	.laser {
 		position: absolute;
 		width: 2px;
-		height: 200vw;
-		min-height: 200vh;
+		height: 300vw;
+		min-height: 300vh;
 		transform-origin: center;
 		transform: translateX(-50%) translateY(-50%);
 		pointer-events: none;
