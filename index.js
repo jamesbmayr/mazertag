@@ -431,9 +431,7 @@
 						return gameIds.indexOf(id) == index
 					}) || []
 					for (var i in gameIds) {
-						CORE.logTime("calculateGame", function() {
-							GAME.calculateGame(gameIds[i], sendSocketData)
-						})
+						GAME.calculateGame(gameIds[i], sendSocketData)
 					}
 			}
 			catch (error) {
