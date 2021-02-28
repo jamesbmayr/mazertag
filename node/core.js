@@ -43,8 +43,10 @@
 				callback()
 				
 				var after = process.hrtime(before)[1] / 1e6
-				if (after > 5) {
+				if (after > 10) {
 					logMessage(flag + " " + after)
+				} else {
+					logMessage(".")
 				}
 			}
 			else {
@@ -325,10 +327,10 @@
 								setup: {
 									mode: "capture_the_hat",
 									time: "180000",
-									size: "3,2",
-									mirrors: "20",
-									windows: "20",
-									teleporters: "3",
+									size: "2,2",
+									mirrors: "10",
+									windows: "10",
+									teleporters: "2",
 									obstacles: "10"
 								},
 								map: {
@@ -473,11 +475,11 @@
 						break
 						case "meta":
 							return `<meta charset="UTF-8"/>
-									<meta name="description" content="MazerTag is a multiplayer top-down arcade game by James Mayr. Audio by Alex Berg."/>
+									<meta name="description" content="MazerTag is a multiplayer top-down arcade game by James Mayr. Audio by Alex Berg. Visuals by Liz Ford."/>
 									<meta name="author" content="James Mayr"/>
 									<meta property="og:title" content="MazerTag"/>
 									<meta property="og:url" content="https://mazertag.herokuapp.com/"/>
-									<meta property="og:description" content="MazerTag is a multiplayer top-down arcade game by James Mayr. Audio by Alex Berg."/>
+									<meta property="og:description" content="MazerTag is a multiplayer top-down arcade game by James Mayr. Audio by Alex Berg. Visuals by Liz Ford."/>
 									<meta property="og:image" content="https://mazertag.herokuapp.com/banner.png"/>
 									<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"/>`
 						break
