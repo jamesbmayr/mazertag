@@ -199,8 +199,8 @@ window.addEventListener("load", function() {
 							laserElement.style.transform = "translateX(-50%) translateY(-50%) rotate(" + 
 								(Math.floor(Math.random() * CONSTANTS.circleDegrees)) + 
 								"deg)"
-							laserElement.style.left = Math.floor(Math.random() * window.innerWidth) + "px"
-							laserElement.style.top  = Math.floor(Math.random() * window.innerHeight) + "px"
+							laserElement.style.left = Math.floor(Math.random() * window.innerWidth / 2)  + (window.innerWidth / 4)  + "px"
+							laserElement.style.top  = Math.floor(Math.random() * window.innerHeight / 2) + (window.innerHeight / 4) + "px"
 							laserElement.setAttribute("v", 
 								(Math.floor(Math.random() * (CONSTANTS.laserMaxVX * 2 + 1)) - CONSTANTS.laserMaxVX) + "," + 
 								(Math.floor(Math.random() * (CONSTANTS.laserMaxVY * 2 + 1)) - CONSTANTS.laserMaxVY) + "," + 

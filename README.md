@@ -1,5 +1,5 @@
 # MAZERTAG
-MazerTag is a multiplayer top-down arcade game by James Mayr
+MazerTag is a multiplayer top-down arcade game by James Mayr. Audio by Alex Berg.
 
 ---
 

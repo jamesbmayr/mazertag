@@ -85,7 +85,7 @@ window.addEventListener("load", function() {
 				circleRadians: Math.PI * 2,
 				circleDegrees: 360,
 				radiansConversion: Math.PI / 180,
-				loopTime: 50,
+				loopTime: 25,
 				fadeTime: 1000,
 				rounding: 100,
 				reflectionWedgeWidth: 2,

@@ -13,6 +13,14 @@
 	}
 
 	/* heading */
+		#heading {
+			user-select: none;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			-o-user-select: none;
+		}
+
 		#heading-logo {
 			background-image: url("assets/logo.png");
 			background-repeat: no-repeat;
@@ -21,6 +29,17 @@
 			width: var(--huge-font-size);
 			float: right;
 			border-radius: var(--border-radius);
+		}
+
+		#footer {
+			position: absolute;
+			bottom: var(--small-font-size);
+			left: 0;
+			width: 100%;
+			text-align: center;
+			font-size: var(--small-font-size);
+			color: var(--medium-gray);
+			font-style: italic;
 		}
 
 	/* forms */
@@ -81,8 +100,8 @@
 	.laser {
 		position: absolute;
 		width: 2px;
-		height: 300vw;
-		min-height: 300vh;
+		height: 400vw;
+		min-height: 400vh;
 		transform-origin: center;
 		transform: translateX(-50%) translateY(-50%);
 		pointer-events: none;
