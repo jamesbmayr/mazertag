@@ -77,7 +77,7 @@ window.addEventListener("load", function() {
 				},
 				audio: {}
 			}
-			window.ELEMENTS = ELEMENTS // ???
+			window.ELEMENTS = ELEMENTS
 
 		/* constants */
 			var CONSTANTS = {
@@ -91,11 +91,18 @@ window.addEventListener("load", function() {
 				reflectionWedgeWidth: 2,
 				maximumReflections: 4,
 				observerZoom: 0.2,
-				audioVolume: 0.6
+				audioVolume: 0.6,
+				mouseThreshold: 100
 			}
 
 		/* game */
 			var INTERACTED = false
+			var MOUSE = {
+				x: null,
+				y: null,
+				a: null
+			}
+
 			var PLAYERID = null
 			var GAME = null
 			var GAMELOOP = setInterval(displayGame, CONSTANTS.loopTime)
@@ -297,6 +304,22 @@ window.addEventListener("load", function() {
 					// update sounds
 						updateSFX(GAME.players[PLAYERID])
 
+					// angle
+						if (PLAYERID && GAME.players[PLAYERID].status.controls == "mouse") {
+							if (MOUSE.a == -1) {
+								SOCKET.send(JSON.stringify({action: "liftKey", playerId: PLAYERID, gameId: GAME.id, key: "cw"}))
+								SOCKET.send(JSON.stringify({action: "pressKey", playerId: PLAYERID, gameId: GAME.id, key: "ccw"}))
+							}
+							else if (MOUSE.a == 1) {
+								SOCKET.send(JSON.stringify({action: "liftKey", playerId: PLAYERID, gameId: GAME.id, key: "ccw"}))
+								SOCKET.send(JSON.stringify({action: "pressKey", playerId: PLAYERID, gameId: GAME.id, key: "cw"}))
+							}
+							else {
+								SOCKET.send(JSON.stringify({action: "liftKey", playerId: PLAYERID, gameId: GAME.id, key: "cw"}))
+								SOCKET.send(JSON.stringify({action: "liftKey", playerId: PLAYERID, gameId: GAME.id, key: "ccw"}))
+							}
+						}
+
 					// done
 						if (GAME.status.endTime) {
 							clearInterval(GAMELOOP)
@@ -345,6 +368,10 @@ window.addEventListener("load", function() {
 							playerElement.element.setAttribute("team", thatPlayer.status.team)
 							if (playerElement.team !== document.activeElement) {
 								playerElement.team.value = thatPlayer.status.team
+							}
+
+							if (playerElement.controls !== document.activeElement) {
+								playerElement.controls.value = thatPlayer.status.controls
 							}
 
 							playerElement.bar.setAttribute("statistics", JSON.stringify({
@@ -425,6 +452,43 @@ window.addEventListener("load", function() {
 								option.value = option.innerText = colors[i]
 							teamSelect.appendChild(option)
 						}
+
+					// controls
+						var controlsLabel = document.createElement("label")
+							controlsLabel.className = "setup-row setup-controls"
+						playerElement.appendChild(controlsLabel)
+
+						var controlsSpan = document.createElement("span")
+							controlsSpan.innerText = "controls"
+						controlsLabel.appendChild(controlsSpan)
+
+						var controlsSelect = document.createElement("select")
+							controlsSelect.className = "setup-select"
+							controlsSelect.id = "setup-player-" + player.id + "-controls"
+							if (player.id !== PLAYERID) { controlsSelect.setAttribute("readonly", true) }
+							else { controlsSelect.addEventListener("input", updateOption) }
+						controlsLabel.appendChild(controlsSelect)
+						ELEMENTS.setup.players[player.id].controls = controlsSelect
+
+						var option = document.createElement("option")
+							option.value = "keys"
+							option.innerText = "keys only"
+						controlsSelect.appendChild(option)
+
+						var option = document.createElement("option")
+							option.value = "mouse"
+							option.innerText = "keys + mouse"
+						controlsSelect.appendChild(option)
+
+						var fakeSelect = document.createElement("select")
+							fakeSelect.className = "setup-select setup-fake"
+							fakeSelect.setAttribute("readonly", true)
+						controlsLabel.appendChild(fakeSelect)
+
+						var fakeOption = document.createElement("option")
+							fakeOption.value = null
+							fakeOption.innerText = "on-screen buttons"
+						fakeSelect.appendChild(fakeOption)
 
 					// stats
 						var notches = document.createElement("div")
@@ -721,6 +785,91 @@ window.addEventListener("load", function() {
 						}
 						if ((event.key && (event.key == "]" || event.code == "BracketRight" || event.key == "." || event.code == "Period" || event.key.toLowerCase() == "x")) || (mobileControls && mobileControls.includes("cw"))) {
 							SOCKET.send(JSON.stringify({action: "liftKey", playerId: PLAYERID, gameId: GAME.id, key: "cw"}))
+						}
+				} catch (error) {console.log(error)}
+			}
+
+		/* pressMouse */
+			window.addEventListener(TRIGGERS.mousedown, pressMouse)
+			function pressMouse(event) {
+				try {
+					// no game or not started
+						if (!GAME || !GAME.status.startTime) {
+							return
+						}
+
+					// not a player
+						if (!PLAYERID || !GAME.players[PLAYERID]) {
+							return false
+						}
+
+					// not mouse controls
+						if (GAME.players[PLAYERID].status.controls !== "mouse") {
+							return false
+						}
+
+					// space
+						SOCKET.send(JSON.stringify({action: "pressKey", playerId: PLAYERID, gameId: GAME.id, key: "space"}))
+				} catch (error) {console.log(error)}
+			}
+
+		/* liftMouse */
+			window.addEventListener(TRIGGERS.mouseup, liftMouse)
+			function liftMouse(event) {
+				try {
+					// no game or not started
+						if (!GAME || !GAME.status.startTime) {
+							return
+						}
+
+					// not a player
+						if (!PLAYERID || !GAME.players[PLAYERID]) {
+							return false
+						}
+
+					// not mouse controls
+						if (GAME.players[PLAYERID].status.controls !== "mouse") {
+							return false
+						}
+
+					// space
+						SOCKET.send(JSON.stringify({action: "liftKey", playerId: PLAYERID, gameId: GAME.id, key: "space"}))
+				} catch (error) {console.log(error)}
+			}
+
+		/* moveMouse */
+			window.addEventListener(TRIGGERS.mousemove, moveMouse)
+			function moveMouse(event) {
+				try {
+					// no game or not started
+						if (!GAME || !GAME.status.startTime) {
+							return
+						}
+
+					// not a player
+						if (!PLAYERID || !GAME.players[PLAYERID]) {
+							return false
+						}
+
+					// not mouse controls
+						if (GAME.players[PLAYERID].status.controls !== "mouse") {
+							return false
+						}
+
+					// get coordinates
+						MOUSE.x = (event.touches ? event.touches[0].clientX : event.clientX)
+						MOUSE.y = (event.touches ? event.touches[0].clientY : event.clientY)
+
+					// get distance from center line
+						var dx = MOUSE.x - (window.innerWidth / 2)
+						if (dx < -CONSTANTS.mouseThreshold) {
+							MOUSE.a = -1
+						}
+						else if (dx > CONSTANTS.mouseThreshold) {
+							MOUSE.a = 1
+						}
+						else {
+							MOUSE.a = 0
 						}
 				} catch (error) {console.log(error)}
 			}
@@ -1216,24 +1365,9 @@ window.addEventListener("load", function() {
 								text: game.status.message,
 								color: game.map.options.text.color,
 								opacity: game.map.options.text.opacity,
-								fontSize: game.map.options.text.fontSize
+								fontSize: game.map.options.text.fontSize / (player ? 1 : CONSTANTS.observerZoom)
 							})
 						}
-
-					// game over?
-						if (game.status.timeRemaining <= 0) {
-							return
-						}
-
-					// timer
-						drawText(canvas, context, {
-							x: canvas.width * game.map.options.time.xOffset,
-							y: canvas.height * game.map.options.time.yOffset,
-							text: Math.floor(game.status.timeRemaining / CONSTANTS.second),
-							color: game.map.options.time.color,
-							opacity: game.map.options.time.opacity,
-							fontSize: game.map.options.time.fontSize
-						})
 
 					// score
 						// game mode: classic_tag
@@ -1244,7 +1378,7 @@ window.addEventListener("load", function() {
 									text: game.status.it ? game.players[game.status.it].name : "?",
 									color: game.map.options.score.color,
 									opacity: game.map.options.score.opacity,
-									fontSize: game.map.options.score.fontSize
+									fontSize: game.map.options.score.fontSize / (player ? 1 : CONSTANTS.observerZoom)
 								})
 							}
 
@@ -1259,7 +1393,7 @@ window.addEventListener("load", function() {
 											text: i.toUpperCase() + ": " + game.status.frozen[i],
 											color: game.map.options.score.color,
 											opacity: game.map.options.score.opacity,
-											fontSize: game.map.options.score.fontSize
+											fontSize: game.map.options.score.fontSize / (player ? 1 : CONSTANTS.observerZoom)
 										})
 										offset -= (1 - game.map.options.score.yOffset)
 									}
@@ -1274,7 +1408,7 @@ window.addEventListener("load", function() {
 									text: game.status.it ? game.players[game.status.it].name : "?",
 									color: game.map.options.score.color,
 									opacity: game.map.options.score.opacity,
-									fontSize: game.map.options.score.fontSize
+									fontSize: game.map.options.score.fontSize / (player ? 1 : CONSTANTS.observerZoom)
 								})
 							}
 
@@ -1289,7 +1423,7 @@ window.addEventListener("load", function() {
 											text: i.toUpperCase() + ": " + game.status.kills[i],
 											color: game.map.options.score.color,
 											opacity: game.map.options.score.opacity,
-											fontSize: game.map.options.score.fontSize
+											fontSize: game.map.options.score.fontSize / (player ? 1 : CONSTANTS.observerZoom)
 										})
 										offset -= (1 - game.map.options.score.yOffset)
 									}
@@ -1307,12 +1441,27 @@ window.addEventListener("load", function() {
 											text: i.toUpperCase() + ": " + game.status.orbs[i],
 											color: game.map.options.score.color,
 											opacity: game.map.options.score.opacity,
-											fontSize: game.map.options.score.fontSize
+											fontSize: game.map.options.score.fontSize / (player ? 1 : CONSTANTS.observerZoom)
 										})
 										offset -= (1 - game.map.options.score.yOffset)
 									}
 								}
 							}
+
+					// game over?
+						if (game.status.timeRemaining <= 0) {
+							return
+						}
+
+					// timer
+						drawText(canvas, context, {
+							x: canvas.width * game.map.options.time.xOffset,
+							y: canvas.height * game.map.options.time.yOffset,
+							text: Math.floor(game.status.timeRemaining / CONSTANTS.second),
+							color: game.map.options.time.color,
+							opacity: game.map.options.time.opacity,
+							fontSize: game.map.options.time.fontSize / (player ? 1 : CONSTANTS.observerZoom)
+						})
 				} catch (error) {console.log(error)}
 			}
 

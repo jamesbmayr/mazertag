@@ -73,6 +73,10 @@
 			#setup-controls {
 				display: none;
 			}
+
+			.setup-player .setup-row.setup-controls .setup-select:not(.setup-fake) {
+				display: none;
+			}
 		}
 
 		#setup-controls label {
@@ -266,6 +270,10 @@
 			display: none;
 			pointer-events: none;
 		}
+
+		.setup-player .setup-row.setup-controls .setup-select.setup-fake {
+			display: none;
+		}
 	}
 
 	#mobile-controls-directions {
@@ -368,6 +376,7 @@
 
 	#again a {
 		font-size: var(--huge-font-size);
+		text-align: center;
 	}
 
 	body:not([mode="gameover"]) #again {

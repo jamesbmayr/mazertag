@@ -364,6 +364,16 @@
 								player.status.team = REQUEST.post.value
 							}
 
+						// controls
+							else if (REQUEST.post.field == "controls") {
+								if (!CONSTANTS.controls.includes(REQUEST.post.value)) {
+									callback({gameId: gameId, success: false, message: "invalid controls", recipients: [REQUEST.session.id]})
+									return
+								}
+
+								player.status.controls = REQUEST.post.value
+							}
+
 						// statistic
 							else if (Object.keys(player.setup).includes(REQUEST.post.field)) {
 								var value = Number(REQUEST.post.value)
@@ -564,7 +574,7 @@
 							}
 
 						// send game data to everyone
-							callback({gameId: game.id, success: true, launch: true, message: "game launched!", game: game, recipients: recipients})
+							callback({gameId: game.id, success: true, launch: true, game: game, recipients: recipients})
 					})
 			}
 			catch (error) {
@@ -1323,6 +1333,13 @@
 						}
 					}
 
+				// 10-second countdown
+					if (game.status.timeRemaining <= CONSTANTS.second * 11) {
+						game.status.message = String(Math.floor(game.status.timeRemaining / CONSTANTS.second))
+						game.status.messageTimeRemaining = CONSTANTS.messageDuration
+						return
+					}
+
 				// game end
 					if (game.status.timeRemaining <= 0) {
 						game.status.message = "GAME OVER"
@@ -1773,44 +1790,49 @@
 
 								// game mode: capture_the_hat
 									if (game.status.mode == "capture_the_hat") {
-										if (player.status.isIt && !player.status.energy) {
-											player.status.sfx.dropOrb = true
+										if (!player.status.energy) {
+											if (player.status.isIt) {
+												player.status.sfx.dropOrb = true
 
-											player.status.isIt = false
-											player.status.cooldowns.invincibility = player.options.invincibilityCooldown
+												player.status.isIt = false
+												game.status.it = null
+												game.status.message = player.name + " DROPS THE HAT"
+												game.status.messageTimeRemaining = CONSTANTS.messageDuration
 
-											game.status.it = null
-											game.status.message = player.name + " DROPS THE HAT"
-											game.status.messageTimeRemaining = CONSTANTS.messageDuration
+												game.items.push({
+													id: CORE.generateRandom(),
+													type: "orb",
+													options: game.map.options.orb,
+													position: {
+														x: player.status.position.x,
+														y: player.status.position.y
+													}
+												})
+											}
 
-											game.items.push({
-												id: CORE.generateRandom(),
-												type: "orb",
-												options: game.map.options.orb,
-												position: {
-													x: player.status.position.x,
-													y: player.status.position.y
-												}
-											})
+											calculateRespawn(game, player)
 										}
-										else if (thatPlayer.status.isIt && !thatPlayer.status.energy) {
-											thatPlayer.status.sfx.dropOrb = true
+										else if (!thatPlayer.status.energy) {
+											if (thatPlayer.status.isIt) {
+												thatPlayer.status.sfx.dropOrb = true
 
-											thatPlayer.status.isIt = false
-											thatPlayer.status.cooldowns.invincibility = thatPlayer.options.invincibilityCooldown
+												thatPlayer.status.isIt = false
+												game.status.it = null
+												game.status.message = thatPlayer.name + " DROPS THE HAT"
+												game.status.messageTimeRemaining = CONSTANTS.messageDuration
 
-											game.status.message = thatPlayer.name + " DROPS THE HAT"
-											game.status.messageTimeRemaining = CONSTANTS.messageDuration
+												game.items.push({
+													id: CORE.generateRandom(),
+													type: "orb",
+													options: game.map.options.orb,
+													position: {
+														x: thatPlayer.status.position.x,
+														y: thatPlayer.status.position.y
+													}
+												})
+											}
 
-											game.items.push({
-												id: CORE.generateRandom(),
-												type: "orb",
-												options: game.map.options.orb,
-												position: {
-													x: thatPlayer.status.position.x,
-													y: thatPlayer.status.position.y
-												}
-											})
+											calculateRespawn(game, thatPlayer)
 										}
 									}
 
@@ -1818,27 +1840,27 @@
 									if (game.status.mode == "team_battle") {
 										if (!thatPlayer.status.energy) {
 											game.status.kills[player.status.team]++
-
-											var teamSpawner = game.items.find(function(item) { return item.team == thatPlayer.status.team }) || null
-											thatPlayer.status.position.x = teamSpawner ? teamSpawner.position.x : (game.map.options.cells.x / 2 * game.map.options.cellsize)
-											thatPlayer.status.position.y = teamSpawner ? teamSpawner.position.y : (game.map.options.cells.y / 2 * game.map.options.cellsize)
-											thatPlayer.status.energy = thatPlayer.options.maximumEnergy
-											thatPlayer.status.cooldowns.invincibility = player.options.invincibilityCooldown
-
 											game.status.message = player.name + " ZAPS " + thatPlayer.name
 											game.status.messageTimeRemaining = CONSTANTS.messageDuration
+
+											calculateRespawn(game, thatPlayer)
 										}
 										else if (!player.status.energy) {
 											game.status.kills[thatPlayer.status.team]++
-
-											var teamSpawner = game.items.find(function(item) { return item.team == player.status.team }) || null
-											player.status.position.x = teamSpawner ? teamSpawner.position.x : (game.map.options.cells.x / 2 * game.map.options.cellsize)
-											player.status.position.y = teamSpawner ? teamSpawner.position.y : (game.map.options.cells.y / 2 * game.map.options.cellsize)
-											player.status.energy = thatPlayer.options.maximumEnergy
-											player.status.cooldowns.invincibility = player.options.invincibilityCooldown
-
 											game.status.message = thatPlayer.name + " ZAPS " + player.name
 											game.status.messageTimeRemaining = CONSTANTS.messageDuration
+
+											calculateRespawn(game, player)
+										}
+									}
+
+								// game mode: collect_the_orbs
+									if (game.status.mode == "collect_the_orbs") {
+										if (!thatPlayer.status.energy) {
+											calculateRespawn(game, thatPlayer)
+										}
+										else if (!player.status.energy) {
+											calculateRespawn(game, player)
 										}
 									}
 							}
@@ -2215,25 +2237,27 @@
 
 												// game mode: capture_the_hat
 													if (game.status.mode == "capture_the_hat") {
-														if (thatPlayer.status.isIt && !thatPlayer.status.energy) {
-															thatPlayer.status.sfx.dropOrb = true
+														if (!thatPlayer.status.energy) {
+															if (thatPlayer.status.isIt) {
+																thatPlayer.status.sfx.dropOrb = true
 
-															thatPlayer.status.isIt = false
-															thatPlayer.status.cooldowns.invincibility = thatPlayer.options.invincibilityCooldown
+																thatPlayer.status.isIt = false
+																game.status.it = null
+																game.status.message = thatPlayer.name + " DROPS THE HAT"
+																game.status.messageTimeRemaining = CONSTANTS.messageDuration
 
-															game.status.it = null
-															game.status.message = thatPlayer.name + " DROPS THE HAT"
-															game.status.messageTimeRemaining = CONSTANTS.messageDuration
+																game.items.push({
+																	id: CORE.generateRandom(),
+																	type: "orb",
+																	options: game.map.options.orb,
+																	position: {
+																		x: thatPlayer.status.position.x,
+																		y: thatPlayer.status.position.y
+																	}
+																})
+															}
 
-															game.items.push({
-																id: CORE.generateRandom(),
-																type: "orb",
-																options: game.map.options.orb,
-																position: {
-																	x: thatPlayer.status.position.x,
-																	y: thatPlayer.status.position.y
-																}
-															})
+															calculateRespawn(game, thatPlayer)
 														}
 													}
 
@@ -2241,15 +2265,17 @@
 													if (game.status.mode == "team_battle") {
 														if (!thatPlayer.status.energy) {
 															game.status.kills[player.status.team]++
-
-															var teamSpawner = game.items.find(function(item) { return item.team == thatPlayer.status.team }) || null
-															thatPlayer.status.position.x = teamSpawner ? teamSpawner.position.x : (game.map.options.cells.x / 2 * game.map.options.cellsize)
-															thatPlayer.status.position.y = teamSpawner ? teamSpawner.position.y : (game.map.options.cells.y / 2 * game.map.options.cellsize)
-															thatPlayer.status.energy = thatPlayer.options.maximumEnergy
-															thatPlayer.status.cooldowns.invincibility = player.options.invincibilityCooldown
-
 															game.status.message = player.name + " ZAPS " + thatPlayer.name
 															game.status.messageTimeRemaining = CONSTANTS.messageDuration
+
+															calculateRespawn(game, thatPlayer)
+														}
+													}
+
+												// game mode: collect_the_orbs
+													if (game.status.mode == "collect_the_orbs") {
+														if (!thatPlayer.status.energy) {
+															calculateRespawn(game, thatPlayer)
 														}
 													}
 
@@ -2281,6 +2307,41 @@
 					player.laser = player.laser.filter(function(value, index) {
 						return (!index || index == player.laser.length - 1) || (value.a !== undefined) // keep first, last, and mirrors
 					}) || []
+			}
+			catch (error) {
+				CORE.logError(error)
+			}
+		}
+
+	/* calculateRespawn */
+		module.exports.calculateRespawn = calculateRespawn
+		function calculateRespawn(game, player) {
+			try {
+				// get spawner
+					var teamSpawner = game.items.find(function(item) { return item.team == player.status.team }) || null
+
+				// move player to spawner
+					player.status.position.x = teamSpawner ? teamSpawner.position.x : (game.map.options.cells.x / 2 * game.map.options.cellsize)
+					player.status.position.y = teamSpawner ? teamSpawner.position.y : (game.map.options.cells.y / 2 * game.map.options.cellsize)
+
+				// reset energy
+					player.status.energy = player.options.maximumEnergy
+					player.status.cooldowns.invincibility = player.options.invincibilityCooldown
+
+				// get another spawner
+					var otherSpawners = game.items.filter(function(item) { return (item.type == "spawner" && item.team !== player.status.team) }) || []
+					if (!otherSpawners || !otherSpawners.length) {
+						return
+					}
+					var swappedSpawner = CORE.chooseRandom(otherSpawners)
+
+				// swap coordinates (to prevent spawn camping)
+					var tempX = swappedSpawner.position.x
+					var tempY = swappedSpawner.position.y
+					swappedSpawner.position.x = teamSpawner.position.x
+					swappedSpawner.position.y = teamSpawner.position.y
+					teamSpawner.position.x = tempX
+					teamSpawner.position.y = tempY
 			}
 			catch (error) {
 				CORE.logError(error)
