@@ -75,7 +75,8 @@ window.addEventListener("load", function() {
 					"space": document.querySelector("#mobile-controls-space"),
 					"cw": document.querySelector("#mobile-controls-cw")
 				},
-				audio: {}
+				audio: {},
+				images: {}
 			}
 			window.ELEMENTS = ELEMENTS
 
@@ -227,6 +228,11 @@ window.addEventListener("load", function() {
 								preloadAudio(data.audio)
 							}
 
+						// image
+							if (data.images) {
+								preloadImages(data.images)
+							}
+
 						// launch
 							if (data.launch) {
 								ELEMENTS.body.setAttribute("mode", "game")
@@ -246,6 +252,7 @@ window.addEventListener("load", function() {
 					// no game yet
 						if (!GAME) {
 							GAME = data
+
 							return
 						}
 
@@ -1203,6 +1210,22 @@ window.addEventListener("load", function() {
 				} catch (error) {console.log(error)}
 			}
 
+		/* drawImage */
+			function drawImage(canvas, context, options) {
+				try {
+					// parameters
+						options = options || {}
+						context.globalAlpha = options.opacity !== undefined ? options.opacity : 1
+
+					// geometry
+						var x = options.x - (options.width / 2)
+						var y = options.y - (options.height / 2)
+
+					// draw
+						context.drawImage(options.image, x, canvas.height - y, options.width, -1 * options.height)
+				} catch (error) {console.log(error)}
+			}
+
 	/*** canvas content ***/
 		/* drawGame */
 			function drawGame(canvas, context, game, player) {
@@ -1222,6 +1245,9 @@ window.addEventListener("load", function() {
 						var offsetY = canvas.height / 2
 							offsetY = player ? (offsetY / player.options.visionTopToBottom) - player.status.position.y : offsetY - mapHeight / 2
 
+					// background
+						
+
 					// adjust center to camera
 						translateCanvas(canvas, context, {
 							x: offsetX,
@@ -1239,13 +1265,22 @@ window.addEventListener("load", function() {
 
 							// SPECTATORS ONLY
 								if (!shadowData) {
-									drawRectangle(canvas, context, {
-										color: game.map.options.background,
-										opacity: 1,
-										x: mapWidth / 2,
-										y: mapHeight / 2,
-										width: canvas.width,
-										height: canvas.height,
+									// drawRectangle(canvas, context, {
+									// 	color: game.map.options.background,
+									// 	opacity: 1,
+									// 	x: mapWidth / 2,
+									// 	y: mapHeight / 2,
+									// 	width: canvas.width,
+									// 	height: canvas.height,
+									// })
+
+									drawImage(canvas, context, {
+										image: ELEMENTS.images[game.map.options.backgroundImage],
+										opacity: game.map.options.backgroundOpacity,
+										x: mapWidth / 2 - game.map.options.cellsize / 2,
+										y: mapHeight / 2 - game.map.options.cellsize / 2,
+										width: mapWidth,
+										height: mapHeight
 									})
 								}
 
@@ -1274,12 +1309,21 @@ window.addEventListener("load", function() {
 										context.globalCompositeOperation = "source-atop"
 
 									// draw background (opaque gray)
-										drawCircle(canvas, context, {
-											color: game.map.options.background,
-											opacity: 1,
-											x: player.status.position.x,
-											y: player.status.position.y,
-											radius: game.map.options.cellsize * player.options.visibility
+										// drawCircle(canvas, context, {
+										// 	color: game.map.options.background,
+										// 	opacity: 1,
+										// 	x: player.status.position.x,
+										// 	y: player.status.position.y,
+										// 	radius: game.map.options.cellsize * player.options.visibility
+										// })
+
+										drawImage(canvas, context, {
+											image: ELEMENTS.images[game.map.options.backgroundImage],
+											opacity: game.map.options.backgroundOpacity,
+											x: mapWidth / 2,
+											y: mapHeight / 2,
+											width: mapWidth,
+											height: mapHeight
 										})
 								}
 
@@ -1652,7 +1696,24 @@ window.addEventListener("load", function() {
 				} catch (error) {console.log(error)}
 			}
 
-	/*** audio ***/
+	/*** assets ***/
+		/* preloadImages */
+			function preloadImages(imageNames) {
+				try {
+					// loop through all imageNames
+						for (var i in imageNames) {
+							// create image element
+								var imageElement = new Image()
+									imageElement.src = "/assets/" + imageNames[i] + ".png"
+
+							// add to list of audio objects
+								if (!ELEMENTS.images[imageNames[i]]) {
+									ELEMENTS.images[imageNames[i]] = imageElement
+								}
+						}
+				} catch (error) {console.log(error)}
+			}
+
 		/* preloadAudio */
 			function preloadAudio(soundNames) {
 				try {

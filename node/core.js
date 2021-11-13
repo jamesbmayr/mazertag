@@ -338,6 +338,8 @@
 									wallCells: [],
 									spaceCells: [],
 									options: {
+										backgroundImage: "background",
+										backgroundOpacity: 0.75,
 										background: colors["medium-gray"],
 										special: colors["dark-gray"],
 										cellsize: 100,
@@ -415,7 +417,7 @@
 											roundness: 48,
 											size: 70,
 											count: 0,
-											opacity: 0.25
+											opacity: 0.75
 										},
 										obstacle: {
 											name: "obstacle",
@@ -586,6 +588,12 @@
 								"shootingLaser_0_100_1",
 								"shootingLaser_0_100_2",
 								"taggedIt"
+							]
+						break
+
+						case "images":
+							return [
+								"background"
 							]
 						break
 

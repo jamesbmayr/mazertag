@@ -182,13 +182,13 @@
 
 						// new player --> send full game
 							if (playerId) {
-								callback({gameId: game.id, success: true, message: null, playerId: playerId, launch: (game.status.startTime ? true : false), game: game, audio: CORE.getAsset("audio"), recipients: [REQUEST.session.id]})
+								callback({gameId: game.id, success: true, message: null, playerId: playerId, launch: (game.status.startTime ? true : false), game: game, audio: CORE.getAsset("audio"), images: CORE.getAsset("images"), recipients: [REQUEST.session.id]})
 								return
 							}
 
 						// existing spectator
 							if (game.spectators[REQUEST.session.id]) {
-								callback({gameId: game.id, success: true, message: "now observing the game", playerId: null, launch: (game.status.startTime ? true : false), game: game, audio: CORE.getAsset("audio"), recipients: [REQUEST.session.id]})
+								callback({gameId: game.id, success: true, message: "now observing the game", playerId: null, launch: (game.status.startTime ? true : false), game: game, audio: CORE.getAsset("audio"), images: CORE.getAsset("images"), recipients: [REQUEST.session.id]})
 								return
 							}
 
@@ -214,7 +214,7 @@
 										}
 
 										// for this spectator
-											callback({gameId: game.id, success: true, message: "now observing the game", playerId: null, launch: (game.status.startTime ? true : false), game: game, audio: CORE.getAsset("audio"), recipients: [REQUEST.session.id]})
+											callback({gameId: game.id, success: true, message: "now observing the game", playerId: null, launch: (game.status.startTime ? true : false), game: game, audio: CORE.getAsset("audio"), images: CORE.getAsset("images"), recipients: [REQUEST.session.id]})
 									})
 							}
 					})
