@@ -292,7 +292,7 @@
 									acceleration: [0, 4, 5, 6],
 									angularAcceleration: 5,
 									bump: [0, 1, 2, 3],
-									teleportCooldown: 20,
+									teleportCooldown: 40,
 									invincibilityCooldown: 100,
 									maximumEnergy: 100,
 									energyRecharge: [0, 1, 2, 3],
@@ -414,14 +414,16 @@
 										teleporter: {
 											name: "teleporter",
 											color: colors["light-orange"],
+											image: "teleporter",
 											roundness: 48,
 											size: 70,
 											count: 0,
-											opacity: 0.75
+											opacity: 0.5
 										},
 										obstacle: {
 											name: "obstacle",
 											color: colors["dark-purple"],
+											image: "obstacle",
 											roundness: 48,
 											size: 90,
 											count: 0,
@@ -438,6 +440,7 @@
 										orb: {
 											name: "orb",
 											color: colors["dark-gray"],
+											image: "orb",
 											roundness: 50,
 											size: 20,
 											count: 10,
@@ -593,7 +596,10 @@
 
 						case "images":
 							return [
-								"background"
+								"background",
+								"obstacle",
+								"orb",
+								"teleporter"
 							]
 						break
 

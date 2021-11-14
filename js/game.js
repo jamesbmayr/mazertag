@@ -1245,9 +1245,6 @@ window.addEventListener("load", function() {
 						var offsetY = canvas.height / 2
 							offsetY = player ? (offsetY / player.options.visionTopToBottom) - player.status.position.y : offsetY - mapHeight / 2
 
-					// background
-						
-
 					// adjust center to camera
 						translateCanvas(canvas, context, {
 							x: offsetX,
@@ -1592,8 +1589,20 @@ window.addEventListener("load", function() {
 					// computed
 						var size = item.options.size ? (item.options.size * mapOptions.cellsize / 100) : mapOptions.cellsize
 
+					// image
+						if (item.options.image) {
+							drawImage(canvas, context, {
+								x: item.position.x,
+								y: item.position.y,
+								width: size,
+								height: size,
+								opacity: item.options.opacity,
+								image: ELEMENTS.images[item.options.image]
+							})
+						}
+
 					// circle
-						if (item.options.roundness == 50) {
+						else if (item.options.roundness == 50) {
 							drawCircle(canvas, context, {
 								x: item.position.x,
 								y: item.position.y,
