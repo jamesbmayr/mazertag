@@ -309,7 +309,7 @@ window.addEventListener("load", function() {
 						drawGame(ELEMENTS.canvas, ELEMENTS.context, GAME, GAME.players[PLAYERID])
 
 					// update sounds
-						updateSFX(GAME.players[PLAYERID])
+						updateSFX(GAME, GAME.players[PLAYERID])
 
 					// angle
 						if (PLAYERID && GAME.players[PLAYERID].status.controls == "mouse") {
@@ -1760,7 +1760,7 @@ window.addEventListener("load", function() {
 			}
 
 		/* updateSFX */
-			function updateSFX(player) {
+			function updateSFX(game, player) {
 				try {
 					// not interacted yet --> browsers block autoplay
 						if (!INTERACTED) {
@@ -1768,9 +1768,16 @@ window.addEventListener("load", function() {
 						}
 
 					// play music
-						if (ELEMENTS.audio.musicGame && ELEMENTS.audio.musicGame.tracks._1.paused) {
+						var now = new Date().getTime()
+						if (ELEMENTS.audio.musicGame && ELEMENTS.audio.musicGame.tracks._1.paused && (GAME.status.startTime < now && !GAME.status.endTime)) {
 							ELEMENTS.audio.musicMenu.tracks._1.pause()
-							// ELEMENTS.audio.musicGame.tracks._1.play() // ??? no game music yet
+							ELEMENTS.audio.musicGame.tracks._1.play()
+						}
+
+					// play menu
+						else if (ELEMENTS.audio.musicMenu && ELEMENTS.audio.musicMenu.tracks._1.paused && GAME.status.endTime) {
+							ELEMENTS.audio.musicMenu.tracks._1.play()
+							ELEMENTS.audio.musicGame.tracks._1.pause()
 						}
 
 					// not a player

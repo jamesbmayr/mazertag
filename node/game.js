@@ -461,7 +461,7 @@
 					game = createMap(game)
 
 				// set time
-					game.status.timeRemaining = Number(game.setup.time) + CONSTANTS.gameLaunchDelay
+					game.status.timeRemaining = Number(game.setup.time)
 
 				// setup players
 					var colors = CORE.getAsset("colors")
@@ -547,6 +547,7 @@
 
 				// actually start
 					game.status.startTime = new Date().getTime() + CONSTANTS.gameLaunchDelay
+					game.status.launching = true
 
 				// query
 					game.updated = new Date().getTime()
@@ -1230,6 +1231,14 @@
 													y: Number(cell.split(",")[1]) * game.map.options.cellsize
 												}
 											})
+										}
+									}
+
+								// game launch
+									if (game.status.launching) {
+										delete game.status.launching
+										for (var i in game.players) {
+											game.players[i].status.sfx.countdownSound = true
 										}
 									}
 
@@ -2043,6 +2052,11 @@
 				// decrease energy
 					player.status.sfx.shootingLaser = true
 					player.status.energy -= player.options.laserUseEnergy
+
+				// not previously shooting?
+					if (!player.laser || !player.laser.length) {
+						player.status.sfx.initiatingLaser = true
+					}
 
 				// starting angles
 					var currentAngle = (player.status.position.a + CONSTANTS.circleDegrees / 4) % CONSTANTS.circleDegrees // 90 degree shift so it's always facing forward

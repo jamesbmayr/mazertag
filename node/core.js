@@ -254,6 +254,7 @@
 										teleport: 0
 									},
 									sfx: {
+										countdownSound: false,
 										collisionOpponentLaser: false,
 										collisionAllyLaser: false,
 										collisionPlayer: false,
@@ -264,6 +265,7 @@
 										dropOrb: false,
 										moving: false,
 										shootingLaser: false,
+										initiatingLaser: false,
 										laserHitting: false,
 										noEnergy: false,
 										taggedIt: false
@@ -313,6 +315,7 @@
 
 						case "game":
 							var colors = getAsset("colors")
+							var mapSetup = getAsset("mapSetup")
 							return {
 								id: generateRandom(null, getAsset("constants").gameIdLength).toLowerCase(),
 								created: new Date().getTime(),
@@ -323,16 +326,17 @@
 									timeRemaining: null,
 									mode: null,
 									message: null,
-									messageTimeRemaining: null
+									messageTimeRemaining: null,
+									launching: false
 								},
 								setup: {
-									mode: "capture_the_hat",
-									time: "180000",
-									size: "2,2",
-									mirrors: "10",
-									windows: "10",
-									teleporters: "2",
-									obstacles: "10"
+									mode: mapSetup.mode.find(function(option) { return option.default }).value,
+									time: mapSetup.time.find(function(option) { return option.default }).value,
+									size: mapSetup.size.find(function(option) { return option.default }).value,
+									mirrors: mapSetup.mirrors.find(function(option) { return option.default }).value,
+									windows: mapSetup.windows.find(function(option) { return option.default }).value,
+									teleporters: mapSetup.teleporters.find(function(option) { return option.default }).value,
+									obstacles: mapSetup.obstacles.find(function(option) { return option.default }).value
 								},
 								map: {
 									wallCells: [],
@@ -569,10 +573,13 @@
 						case "audio":
 							return [
 								// soundName_msUntilChange_msToFadeOut_version
+								"countdownSound_0_6000_1",
 								"musicMenu",
 								"musicGame",
 								"collisionAllyLaser_1000_0_1",
-								"collisionObstacle",
+								"collisionObstacle_160_0_1",
+								"collisionObstacle_160_0_2",
+								"collisionObstacle_160_0_3",
 								"collisionOpponentLaser_1000_0_1",
 								"collisionOrb",
 								"collisionPlayer",
@@ -588,8 +595,8 @@
 								"moving_400_0_3",
 								"moving_400_0_4",
 								"noEnergy",
+								"initiatingLaser",
 								"shootingLaser_0_100_1",
-								"shootingLaser_0_100_2",
 								"taggedIt"
 							]
 						break
@@ -1362,39 +1369,39 @@
 								mode: [
 									{value: "classic_tag", name: "classic tag", description: "If you're \"it\", bump or zap someone to make them \"it\". Whoever's \"it\" when time runs out loses."},
 									{value: "team_freeze_tag", name: "team freeze tag", description: "Zap opponents to freeze them in place. Zap allies to unfreeze them. Win by freezing all other teams."},
-									{value: "capture_the_hat", name: "capture the hat", description: "Find the hat - or whoever has it. Then run into the shadows and hold it until time runs out."},
+									{value: "capture_the_hat", name: "capture the hat", description: "Find the hat - or whoever has it. Then run into the shadows and hold it until time runs out.", default: true},
 									{value: "team_battle", name: "team battle", description: "Zap someone down to 0 to get a point for your team. The team with the most points wins."},
 									{value: "collect_the_orbs", name: "collect the orbs", description: "Zap or run into orbs to earn a point for your team. The team with the most points wins."}
 								],
 								time: [
-									{value: String(constants.minute * 1), name: "short (1 minute)"},
-									{value: String(constants.minute * 3), name: "medium (3 minutes)"},
-									{value: String(constants.minute * 5), name: "long (5 minutes)"},
-									{value: String(constants.minute * 10), name: "marathon (10 minutes)"},
+									{value: String(constants.minute * 1 - constants.gameLaunchDelay - constants.second), name: "short (1 minute)"},
+									{value: String(constants.minute * 3 - constants.gameLaunchDelay - constants.second), name: "medium (3 minutes)", default: true},
+									{value: String(constants.minute * 6 - constants.gameLaunchDelay - constants.second), name: "long (6 minutes)"},
+									{value: String(constants.minute * 9 - constants.gameLaunchDelay - constants.second), name: "marathon (9 minutes)"},
 								],
 								size: [
 									{value: "1,1", name: "tiny (1x1)"},
-									{value: "2,2", name: "small (2x2)"},
+									{value: "2,2", name: "small (2x2)", default: true},
 									{value: "3,2", name: "medium (3x2)"},
 									{value: "3,3", name: "large (3x3)"}
 								],
 								windows: [
 									{value: "0", name: "none (0)"},
-									{value: "10", name: "few (10)"},
+									{value: "10", name: "few (10)", default: true},
 									{value: "20", name: "some (20)"},
 									{value: "30", name: "many (30)"},
 									{value: "40", name: "lots (40)"}
 								],
 								mirrors: [
 									{value: "0", name: "none (0)"},
-									{value: "10", name: "few (10)"},
+									{value: "10", name: "few (10)", default: true},
 									{value: "20", name: "some (20)"},
 									{value: "30", name: "many (30)"},
 									{value: "40", name: "lots (40)"}
 								],
 								teleporters: [
 									{value: "0", name: "none (0)"},
-									{value: "2", name: "few (2)"},
+									{value: "2", name: "few (2)", default: true},
 									{value: "3", name: "some (3)"},
 									{value: "4", name: "many (4)"},
 									{value: "5", name: "lots (5)"}
@@ -1402,7 +1409,7 @@
 								obstacles: [
 									{value: "0", name: "none (0)"},
 									{value: "5", name: "few (5)"},
-									{value: "10", name: "some (10)"},
+									{value: "10", name: "some (10)", default: true},
 									{value: "15", name: "many (15)"},
 									{value: "20", name: "lots (20)"}
 								]
