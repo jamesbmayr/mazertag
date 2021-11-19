@@ -1374,10 +1374,10 @@
 									{value: "collect_the_orbs", name: "collect the orbs", description: "Zap or run into orbs to earn a point for your team. The team with the most points wins."}
 								],
 								time: [
-									{value: String(constants.minute * 1 - constants.gameLaunchDelay - constants.second), name: "short (1 minute)"},
-									{value: String(constants.minute * 3 - constants.gameLaunchDelay - constants.second), name: "medium (3 minutes)", default: true},
-									{value: String(constants.minute * 6 - constants.gameLaunchDelay - constants.second), name: "long (6 minutes)"},
-									{value: String(constants.minute * 9 - constants.gameLaunchDelay - constants.second), name: "marathon (9 minutes)"},
+									{value: String(constants.minute * 1 - 1 * constants.second), name: "short (1 minute)"},
+									{value: String(constants.minute * 3 - 3 * constants.second), name: "medium (3 minutes)", default: true},
+									{value: String(constants.minute * 6 - 6 * constants.second), name: "long (6 minutes)"},
+									{value: String(constants.minute * 9 - 9 * constants.second), name: "marathon (9 minutes)"},
 								],
 								size: [
 									{value: "1,1", name: "tiny (1x1)"},
