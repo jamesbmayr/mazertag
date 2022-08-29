@@ -488,9 +488,9 @@
 									<meta name="description" content="MazerTag is a multiplayer top-down arcade game by James Mayr. Audio by Alex Berg. Visuals by Liz Ford."/>
 									<meta name="author" content="James Mayr"/>
 									<meta property="og:title" content="MazerTag"/>
-									<meta property="og:url" content="https://mazertag.herokuapp.com/"/>
+									<meta property="og:url" content="https://jamesmayr.com/mazertag/"/>
 									<meta property="og:description" content="MazerTag is a multiplayer top-down arcade game by James Mayr. Audio by Alex Berg. Visuals by Liz Ford."/>
-									<meta property="og:image" content="https://mazertag.herokuapp.com/banner.png"/>
+									<meta property="og:image" content="https://jamesmayr.com/mazertag/banner.png"/>
 									<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"/>`
 						break
 						case "fonts":
