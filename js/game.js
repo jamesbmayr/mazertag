@@ -170,6 +170,7 @@ window.addEventListener("load", function() {
 			function createSocket() {
 				try {
 					SOCKET = new WebSocket(location.href.replace("http","ws"))
+					SOCKET.keepPinging = false
 					SOCKET.onopen = function() {
 						SOCKET.send(null)
 					}
@@ -183,6 +184,7 @@ window.addEventListener("load", function() {
 					}
 					SOCKET.onmessage = function(message) {
 						try {
+							SOCKET.keepPinging = true
 							var post = JSON.parse(message.data)
 							if (post && (typeof post == "object")) {
 								receiveSocket(post)
@@ -195,9 +197,12 @@ window.addEventListener("load", function() {
 						clearInterval(SOCKET.pingLoop)
 					}
 					SOCKET.pingLoop = setInterval(function() {
-						fetch("/ping", {method: "GET"})
-							.then(function(response){ return response.json() })
-							.then(function(data) {})
+						if (SOCKET.keepPinging) {
+							SOCKET.keepPinging = false
+							fetch("/ping", {method: "GET"})
+								.then(function(response){ return response.json() })
+								.then(function(data) {})
+						}
 					}, PINGINTERVAL)
 				}
 				catch (error) {console.log(error)}
